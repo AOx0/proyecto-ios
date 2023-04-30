@@ -13,6 +13,8 @@ struct GroupInfo: Codable {
     var puntuacion_min: Int64
     var id_grupo: Int64
     var id_owner: Int32
+    var direccion: String
+    var nombre: String
     
     static func group_info(id: Int64) async -> GroupInfo? {
         let url = URL(string: "https://65ba-192-100-230-250.ngrok.io/group/\(id)")!

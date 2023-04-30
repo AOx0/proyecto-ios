@@ -1,12 +1,12 @@
 use axum::{
     debug_handler,
     extract::{Path, State},
-    http::{Response, StatusCode},
-    response::{Html, IntoResponse},
-    routing::{get, patch, post},
+    http::{StatusCode},
+    response::{IntoResponse},
+    routing::{get, post},
     Json, Router, Server,
 };
-use chrono::NaiveDate;
+
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::prelude::*;
@@ -24,6 +24,8 @@ struct Grupo {
     id_conductor: i32,
     puntuacion_min: i64,
     id_owner: i32,
+    nombre: String,
+    direccion: String
 }
 
 #[allow(dead_code)]
@@ -81,10 +83,6 @@ struct GrupoCom {
     id_grupo: i64,
 }
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
-struct Grub {
-    id_grupo: i64,
-}
 
 #[debug_handler]
 async fn register_user(
@@ -166,15 +164,34 @@ async fn new_group(
         id_conductor,
         puntuacion_min,
         id_owner,
+        direccion,
+        nombre
     } = grup;
-    println!("{:?}", grup);
-    sqlx::query(&format!("INSERT INTO grupo (id_conductor, puntuacion_min, id_owner) VALUES ({id_conductor}, {puntuacion_min}, {id_owner} )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+
+    sqlx::query(&format!("INSERT INTO grupo (id_conductor, puntuacion_min, id_owner, nomrbre, direccion) VALUES ({id_conductor}, {puntuacion_min}, {id_owner},'{nombre}', '{direccion}' )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
 }
 
 async fn add_user_to_group(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<i64>,
+    Path((id, id_grupo)): Path<(i64, i64)>,
 ) -> impl IntoResponse {
+    sqlx::query(&format!("INSERT INTO grupo_usuario (id_usuario, id_grupo) VALUES ({id}, {id_grupo})")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+    (StatusCode::OK, "")
+
+}
+
+async fn remove_user_from_group(
+    State(state): State<Arc<AppState>>,
+    Path((id, id_grupo)): Path<(i64, i64)>
+) -> impl IntoResponse {
+    sqlx::query(&format!(
+        "DELETE FROM grupos_usuarios WHERE id_usuario = '{id}' and id_grupo = '{id_grupo}' "
+        ))
+        .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+        .await
+        .unwrap();
+
+    (StatusCode::OK, "")
 }
 
 async fn get_user_groups(
@@ -236,6 +253,8 @@ async fn main() {
         .route("/groups_of/:id", get(get_user_groups))
         .route("/login", post(login))
         .route("/new_group", post(new_group))
+        .route("/r_group/:id/:group", get(remove_user_from_group))
+        .route("/a_group/:id/:group", get(add_user_to_group))
         .with_state(state);
 
     Server::bind(&format!("{}:{}", address, port).parse().unwrap())
