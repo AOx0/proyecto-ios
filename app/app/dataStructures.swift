@@ -7,6 +7,36 @@
 
 import Foundation
 
+struct GroupCreation: Codable {
+    var nombre: String = ""
+    var destination: String = ""
+    var puntuacion: Float = 4.5
+    var id_owner: Int64 = 0
+    
+    mutating func create_group(id: Int64) async -> Bool {
+        id_owner = id
+        
+        let url = URL(string: "http://54.86.117.228:9090/new_group")!
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if let body = try? JSONEncoder().encode(self) {
+            req.httpBody = body
+        } else { return false }
+        
+        if let (_, response) = (try? await URLSession.shared.data(for: req) ) {
+            let httpResponse = response as? HTTPURLResponse
+            if httpResponse!.statusCode == 200 {
+                return true
+            }
+        }
+        
+        return false
+        
+    }
+}
+
 struct GroupInfo: Codable, Identifiable, Equatable {
     var id: Int64 {
         id_grupo
@@ -15,7 +45,6 @@ struct GroupInfo: Codable, Identifiable, Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
-    
     
     var id_conductor: Int32
     var puntuacion_min: Float
@@ -35,6 +64,20 @@ struct GroupInfo: Codable, Identifiable, Equatable {
             return info
         }
         
+        return nil
+    }
+    
+    func get_users() async -> [User]? {
+        let url = URL(string: "http://54.86.117.228:9090/users_of/\(id)")!
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        
+        if let (data, response) = (try? await URLSession.shared.data(for: req) ) {
+            let httpResponse = response as? HTTPURLResponse
+            if httpResponse!.statusCode == 200 {
+                return try! JSONDecoder().decode([User].self, from: data)
+            }
+        }
         return nil
     }
 }
@@ -99,7 +142,7 @@ struct User: Codable, Identifiable {
 }
 
 struct UserRegister: Codable {
-    var nombre: String = "DEFAULT"
+    var nombre: String = ""
     var apellido: String = ""
     var fecha_nacimiento: String = ""
     var correo: String = ""

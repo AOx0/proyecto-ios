@@ -12,7 +12,6 @@ struct HomeView: View {
     
     @Binding var user: User
     @State var groups = [GroupInfo]()
-    
     @State var creando_grupo = false
     
     func hi_msg() -> String {
@@ -124,7 +123,8 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $creando_grupo) {
-                CreateGroupView()
+                CreateGroupView( groups: $groups, user: $user, active: $creando_grupo)
+                
             }
         }
     }

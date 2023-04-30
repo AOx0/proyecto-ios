@@ -17,19 +17,36 @@ struct WelcomeView: View {
             
             VStack {
                 HStack {
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 30) {
                         Text("Bienvenido")
                             .bold()
                             .font(.largeTitle)
-                            .foregroundColor(Color("white"))
+                        
+                        VStack(alignment: .leading) {
+                            Text("Mismo destino?")
+                                .font(.title2)
+                                .bold()
+                            
+                            Text("Comparte tu viaje y fluye")
+                                .font(.title2)
+                                .bold()
+                            
+                            Text("- Contaminación")
+                                .font(.title2)
+                                .bold()
+                            Text("- Trafico")
+                                .font(.title2)
+                                .bold()
+                            Text("+ Comodidad")
+                                .font(.title2)
+                                .bold()
+                        }
                         
                         Spacer()
-                        
-                        Text("¿ Por qué usar ?")
-                            .font(.title2)
-                            .bold()
-                            .foregroundColor(Color("white"))
+
+                            
                     }
+                    .foregroundColor(Color("white"))
                     
                     Spacer()
                 }

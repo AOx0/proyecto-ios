@@ -9,9 +9,10 @@ import SwiftUI
 import MapKit
 
 struct CreateGroupView: View {
-    @State var nombre: String = ""
-    @State var destination: String = ""
-    @State var puntuacion: Float = 4.5
+    @State var new_group = GroupCreation()
+    @Binding var groups: [GroupInfo]
+    @Binding var user: User
+    @Binding var active: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 30) {
@@ -22,7 +23,7 @@ struct CreateGroupView: View {
                 Spacer()
             }
             
-            TextField("Nombre del grupo", text: $nombre)
+            TextField("Nombre del grupo", text: $new_group.nombre)
                 .frame(height: 20)
                 .padding()
                 .textFieldStyle(.plain)
@@ -33,14 +34,14 @@ struct CreateGroupView: View {
                 .textInputAutocapitalization(.never)
             
             VStack {
-                Text("Puntuación minima: \(String(format: "%.2f", puntuacion))")
+                Text("Puntuación minima: \(String(format: "%.2f", new_group.puntuacion))")
                 Slider(
-                    value: $puntuacion,
+                    value: $new_group.puntuacion,
                     in: 0...5
                 )
             }
             
-            TextField("Dirección/destino", text: $destination)
+            TextField("Dirección/destino", text: $new_group.destination)
                 .frame(height: 20)
                 .padding()
                 .textFieldStyle(.plain)
@@ -50,13 +51,26 @@ struct CreateGroupView: View {
                 )
                 .textInputAutocapitalization(.never)
             
+            Button("Create group") {
+                Task {
+                    await new_group.create_group(id: user.id)
+                    if let tmp = await user.get_groups() {
+                        groups = tmp
+                    }
+                    active = false
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color("gray_log_in"))
+            )
+            .foregroundColor(.black)
+            .frame(maxWidth: .infinity)
+            
             Spacer()
         }.padding()
     }
 }
 
-struct CreateGroupView_Previews: PreviewProvider {
-    static var previews: some View {
-        CreateGroupView()
-    }
-}
+
