@@ -58,6 +58,15 @@ struct LogIn {
     correo: String,
     password: String,
 }
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct UserCal {
+    puntuacion: f32,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct GroupMin {
+    puntuacion_min: f32,
+}
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct User {
@@ -174,12 +183,33 @@ async fn add_user_to_group(
     State(state): State<Arc<AppState>>,
     Path((id, id_grupo)): Path<(i64, i64)>,
 ) -> impl IntoResponse {
-    sqlx::query(&format!(
-        "INSERT INTO grupos_usuarios (id_usuario, id_grupo) VALUES ({id}, {id_grupo})"
+    let user: Vec<UserCal> =
+        sqlx::query_as::<_, UserCal>(&format!("SELECT puntuacion FROM usuario WHERE id = {id} "))
+            .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+            .await
+            .unwrap();
+
+    let group: Vec<GroupMin> = sqlx::query_as::<_, GroupMin>(&format!(
+        "SELECT puntuacion_min FROM grupo WHERE id_grupo = {id_grupo} "
     ))
-    .execute(&mut state.db_pool.acquire().await.unwrap())
-    .await;
-    (StatusCode::OK, "")
+    .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+    .await
+    .unwrap();
+
+    if user[0].puntuacion >= group[0].puntuacion_min {
+        sqlx::query(&format!(
+            "INSERT INTO grupos_usuarios (id_usuario, id_grupo) VALUES ({id}, {id_grupo})"
+        ))
+        .execute(&mut state.db_pool.acquire().await.unwrap())
+        .await;
+
+        (StatusCode::OK, "Ingreso exitoso")
+    } else {
+        (
+            StatusCode::NOT_ACCEPTABLE,
+            "el usuario es apto para unirse sal grupo",
+        )
+    }
 }
 
 async fn remove_user_from_group(
