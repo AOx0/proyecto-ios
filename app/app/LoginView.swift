@@ -6,37 +6,14 @@
 
 import SwiftUI
 
-struct UserLoginInfo: Encodable {
-    var correo: String
-    var password: String
-    
-    static func login(user: String, pass: String) async -> Bool {
-        let url = URL(string: "https://cf95-192-100-230-250.ngrok.io/login")!
-        var req = URLRequest(url: url)
-        req.httpMethod = "POST"
-        req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let user = UserLoginInfo(correo: user, password: pass)
-        if let body = try? JSONEncoder().encode(user) {
-            req.httpBody = body
-        } else { return false }
-        
-        if let (_, response) = (try? await URLSession.shared.data(for: req) ) {
-            let httpResponse = response as? HTTPURLResponse
-            if httpResponse?.statusCode == 202 {
-                return true
-            }
-        }
-        
-        return false
-    }
-}
 
 struct LoginView: View {
     @State var user = ""
     @State var pass = ""
     
     @State var registrarUsuario = false
+    
+    @Binding var global_user: User
     
     var body: some View {
         GeometryReader { geo in
@@ -84,10 +61,8 @@ struct LoginView: View {
                     VStack(alignment: .center, spacing: 20) {
                         Button(action: {
                             Task {
-                                if let res = await GroupInfo.group_info(id: 1) {
-                                    print(res)
-                                }
-                                if await UserLoginInfo.login(user: user, pass: pass) {
+                                if let user = await UserLoginInfo.login(user: user, pass: pass) {
+                                    global_user = user
                                     print("Logged in")
                                 } else {
                                     print("Error")
@@ -125,7 +100,8 @@ struct LoginView: View {
 }
 
 struct LoginView_Previews: PreviewProvider {
+    @State static var user = User()
     static var previews: some View {
-        LoginView()
+        LoginView(global_user: $user)
     }
 }

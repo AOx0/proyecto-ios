@@ -54,24 +54,6 @@ struct WelcomeView: View {
     }
 }
 
-struct GroupInfo: Codable {
-    var id_conductor: Int32
-    var automovil: Int64
-    var puntuacion_min: Int64
-    var id_grupo: Int64
-    var id_owner: Int32
-    
-    static func group_info(id: Int64) async -> GroupInfo? {
-        let url = URL(string: "https://cf95-192-100-230-250.ngrok.io/group/\(id)")!
-        if let (data, _) = (try? await URLSession.shared.data(from: url) ) {
-            let info = try? JSONDecoder().decode(GroupInfo.self, from: data)
-            return info
-        }
-        
-        return nil
-    }
-}
-
 struct WelcomeView_Previews: PreviewProvider {
     @State static var show: Bool = true
     static var previews: some View {

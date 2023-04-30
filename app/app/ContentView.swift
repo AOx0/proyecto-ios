@@ -9,16 +9,22 @@ import SwiftUI
 
 struct ContentView: View {
     @State var show_welcome: Bool = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+    @State var user: User = User()
+    
     
     var body: some View {
         NavigationView {
-            ZStack{
-                WelcomeView(showing: $show_welcome)
-                    .opacity(show_welcome ? 1 : 0)
-                    .animation(.easeOut, value: show_welcome)
-                    .zIndex(2)
-                LoginView()
-                    .zIndex(1)
+            if !user.is_default() {
+                HomeView(user: $user)
+            } else {
+                ZStack{
+                    WelcomeView(showing: $show_welcome)
+                        .opacity(show_welcome ? 1 : 0)
+                        .animation(.easeOut, value: show_welcome)
+                        .zIndex(2)
+                    LoginView(global_user: $user)
+                        .zIndex(1)
+                }
             }
         }
     }

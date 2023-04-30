@@ -10,6 +10,8 @@ import SwiftUI
 struct HomeView: View {
     @State var search_text: String = ""
     
+    @Binding var user: User
+    
     func hi_msg() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
 
@@ -65,7 +67,7 @@ struct HomeView: View {
                     .bold()
                 
                 Button(action: {
-                    // Sign in button tapped
+                    
                 }) {
                     HStack {
                         Text("Crea un nuevo grupo")
@@ -87,7 +89,8 @@ struct HomeView: View {
 }
 
 struct HomeView_Previews: PreviewProvider {
+    @State static var user = User()
     static var previews: some View {
-        HomeView()
+        HomeView(user: $user)
     }
 }
