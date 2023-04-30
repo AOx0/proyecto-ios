@@ -21,6 +21,16 @@ struct Cliente {
 //TODO: Re-hacer esto
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct Grupo {
+    id_grupo: i64,
+    id_conductor: i32,
+    puntuacion_min: f32,
+    id_owner: i32,
+    nombre: String,
+    direccion: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct GrupoNew {
     id_conductor: i32,
     puntuacion_min: i64,
     id_owner: i32,
@@ -82,14 +92,6 @@ struct User {
     calificacion_conductor: f32,
     activo: bool,
     password: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, FromRow)]
-struct GrupoCom {
-    id_conductor: i32,
-    puntuacion_min: i64,
-    id_owner: i32,
-    id_grupo: i64,
 }
 
 #[debug_handler]
@@ -166,9 +168,9 @@ async fn login(State(state): State<Arc<AppState>>, Json(log): Json<LogIn>) -> im
 
 async fn new_group(
     State(state): State<Arc<AppState>>,
-    Json(grup): Json<Grupo>,
+    Json(grup): Json<GrupoNew>,
 ) -> impl IntoResponse {
-    let Grupo {
+    let GrupoNew {
         id_conductor,
         puntuacion_min,
         id_owner,
@@ -176,7 +178,7 @@ async fn new_group(
         nombre,
     } = grup;
 
-    sqlx::query(&format!("INSERT INTO grupo (id_conductor, puntuacion_min, id_owner, nomrbre, direccion) VALUES ({id_conductor}, {puntuacion_min}, {id_owner},'{nombre}', '{direccion}' )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+    sqlx::query(&format!("INSERT INTO grupo (id_conductor, puntuacion_min, id_owner, nombre, direccion) VALUES ({id_conductor}, {puntuacion_min}, {id_owner},'{nombre}', '{direccion}' )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
 }
 
 async fn add_user_to_group(
