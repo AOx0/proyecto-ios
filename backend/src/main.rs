@@ -31,7 +31,7 @@ struct Grupo {
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct GrupoNew {
-    id_conductor: i32,
+    id_conductor: Option<i32>,
     puntuacion_min: i64,
     id_owner: i32,
     nombre: String,
@@ -178,7 +178,7 @@ async fn new_group(
         nombre,
     } = grup;
 
-    sqlx::query(&format!("INSERT INTO grupo (id_conductor, puntuacion_min, id_owner, nombre, direccion) VALUES ({id_conductor}, {puntuacion_min}, {id_owner},'{nombre}', '{direccion}' )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+    sqlx::query(&format!("INSERT INTO grupo (puntuacion_min, id_owner, nombre, direccion) VALUES ( {puntuacion_min}, {id_owner},'{nombre}', '{direccion}' )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
 }
 
 async fn add_user_to_group(
@@ -237,6 +237,7 @@ async fn get_user_groups(
     .fetch_all(&mut state.db_pool.acquire().await.unwrap())
     .await
     .unwrap();
+    println!("{:?}", groups);
 
     (StatusCode::OK, serde_json::to_string(&groups).unwrap())
 }
