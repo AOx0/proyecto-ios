@@ -17,6 +17,7 @@
 		A9B5017E29FE5DAF001056C3 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B5017D29FE5DAF001056C3 /* SignupView.swift */; };
 		FE418ED229FEC63F00D52E9E /* dataStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE418ED129FEC63F00D52E9E /* dataStructures.swift */; };
 		FE418ED429FED8F800D52E9E /* CreateGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE418ED329FED8F800D52E9E /* CreateGroupView.swift */; };
+		FE418ED629FF041600D52E9E /* GroupDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE418ED529FF041600D52E9E /* GroupDetailsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		A9B5017D29FE5DAF001056C3 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		FE418ED129FEC63F00D52E9E /* dataStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dataStructures.swift; sourceTree = "<group>"; };
 		FE418ED329FED8F800D52E9E /* CreateGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGroupView.swift; sourceTree = "<group>"; };
+		FE418ED529FF041600D52E9E /* GroupDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 				A9B5017729FE51B0001056C3 /* LoginView.swift */,
 				FE418ED129FEC63F00D52E9E /* dataStructures.swift */,
 				A9B5017D29FE5DAF001056C3 /* SignupView.swift */,
+				FE418ED529FF041600D52E9E /* GroupDetailsView.swift */,
 				A9B5016D29FE500D001056C3 /* Assets.xcassets */,
 				A9B5016F29FE500D001056C3 /* Preview Content */,
 			);
@@ -163,6 +166,7 @@
 				A9B5016A29FE500A001056C3 /* appApp.swift in Sources */,
 				A9B5017C29FE5359001056C3 /* HomeView.swift in Sources */,
 				A9B5017A29FE5216001056C3 /* WelcomeView.swift in Sources */,
+				FE418ED629FF041600D52E9E /* GroupDetailsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

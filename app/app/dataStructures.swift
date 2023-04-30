@@ -7,17 +7,29 @@
 
 import Foundation
 
-struct GroupInfo: Codable {
+struct GroupInfo: Codable, Identifiable, Equatable {
+    var id: Int64 {
+        id_grupo
+    }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    
     var id_conductor: Int32
-    var automovil: Int64
-    var puntuacion_min: Int64
+    var puntuacion_min: Float
     var id_grupo: Int64
     var id_owner: Int32
     var direccion: String
     var nombre: String
     
+    static func deft() -> GroupInfo {
+        GroupInfo(id_conductor: 0, puntuacion_min: 0, id_grupo: 0, id_owner: 0, direccion: "", nombre: "")
+    }
+    
     static func group_info(id: Int64) async -> GroupInfo? {
-        let url = URL(string: "https://65ba-192-100-230-250.ngrok.io/group/\(id)")!
+        let url = URL(string: "http://54.86.117.228:9090/group/\(id)")!
         if let (data, _) = (try? await URLSession.shared.data(from: url) ) {
             let info = try? JSONDecoder().decode(GroupInfo.self, from: data)
             return info
@@ -32,7 +44,7 @@ struct UserLoginInfo: Encodable {
     var password: String
     
     static func login(user: String, pass: String) async -> User? {
-        let url = URL(string: "https://65ba-192-100-230-250.ngrok.io/login")!
+        let url = URL(string: "http://54.86.117.228:9090/login")!
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -53,7 +65,8 @@ struct UserLoginInfo: Encodable {
     }
 }
 
-struct User: Codable {
+struct User: Codable, Identifiable {
+    var id: Int64 = 0
     var nombre: String = ""
     var apellido: String = ""
     var fecha_nacimiento: String = ""
@@ -65,6 +78,20 @@ struct User: Codable {
     var numero_de_viajes: Int64 = 0
     var calificacion_conductor: Float = 0.0
     var activo: Bool = false
+    
+    func get_groups() async -> [GroupInfo]? {
+        let url = URL(string: "http://54.86.117.228:9090/groups_of/\(id)")!
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        
+        if let (data, response) = (try? await URLSession.shared.data(for: req) ) {
+            let httpResponse = response as? HTTPURLResponse
+            if httpResponse!.statusCode == 200 {
+                return try! JSONDecoder().decode([GroupInfo].self, from: data)
+            }
+        }
+        return nil
+    }
     
     func is_default() -> Bool {
         correo == "DEFAULT"
@@ -81,7 +108,7 @@ struct UserRegister: Codable {
     
     // Returns an string when it fails
     func register() async -> String? {
-        let url = URL(string: "https://65ba-192-100-230-250.ngrok.io/register")!
+        let url = URL(string: "http://54.86.117.228:9090/register")!
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")

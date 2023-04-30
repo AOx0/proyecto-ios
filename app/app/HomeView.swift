@@ -11,6 +11,9 @@ struct HomeView: View {
     @State var search_text: String = ""
     
     @Binding var user: User
+    @State var groups = [GroupInfo]()
+    
+    @State var creando_grupo = false
     
     func hi_msg() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -29,7 +32,7 @@ struct HomeView: View {
     
     var body: some View {
         ZStack{
-            Color("gray_log_in")
+            Color.white
                 .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 30) {
@@ -48,7 +51,7 @@ struct HomeView: View {
                     .textFieldStyle(.plain)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(.white)
+                            .fill(Color("gray_log_in"))
                     )
                     .textInputAutocapitalization(.never)
                 
@@ -56,18 +59,12 @@ struct HomeView: View {
                     .font(.title2)
                     .bold()
                 
-                Text("Mis grupos")
-                    .font(.title2)
-                    .bold()
-                
-                Spacer()
-                
                 Text("Nuevo Grupo")
                     .font(.title2)
                     .bold()
                 
                 Button(action: {
-                    
+                    creando_grupo.toggle()
                 }) {
                     HStack {
                         Text("Crea un nuevo grupo")
@@ -78,12 +75,57 @@ struct HomeView: View {
                     .foregroundColor(.black)
                     .bold()
                 }
-                .background(.white)
+                .background(Color("gray_log_in"))
                 .cornerRadius(10)
                 
+                Text("Mis grupos")
+                    .font(.title2)
+                    .bold()
                 
+                ScrollView {
+                    ForEach(groups) { group in
+                        NavigationLink {
+                            GroupDetailsView(group: $groups[groups.firstIndex(of: group)!])
+                                .foregroundColor(.black)
+                        } label: {
+                            HStack(alignment: .center) {
+                                VStack(alignment: .leading) {
+                                    Text(group.nombre)
+                                    Spacer()
+                                    HStack {
+                                        Image(systemName: "map.fill")
+                                        Text(group.direccion)
+                                            .font(.footnote)
+                                    }
+                                }
+                                Spacer()
+                                Image(systemName: "car.fill")
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color("gray_log_in"))
+                            )
+                            .foregroundColor(.black)
+                        }
+                        
+                    }
+                }
             }
             .padding()
+            .onAppear() {
+                Task {
+                    if !user.is_default() {
+                        if let tmp = await user.get_groups() {
+                            groups = tmp
+                        }
+                    }
+                    
+                }
+            }
+            .sheet(isPresented: $creando_grupo) {
+                CreateGroupView()
+            }
         }
     }
 }
