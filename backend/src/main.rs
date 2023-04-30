@@ -31,7 +31,6 @@ struct Grupo {
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct GrupoNew {
-    id_conductor: Option<i32>,
     puntuacion_min: i64,
     id_owner: i32,
     nombre: String,
@@ -171,7 +170,6 @@ async fn new_group(
     Json(grup): Json<GrupoNew>,
 ) -> impl IntoResponse {
     let GrupoNew {
-        id_conductor,
         puntuacion_min,
         id_owner,
         direccion,
@@ -179,6 +177,8 @@ async fn new_group(
     } = grup;
 
     sqlx::query(&format!("INSERT INTO grupo (puntuacion_min, id_owner, nombre, direccion) VALUES ( {puntuacion_min}, {id_owner},'{nombre}', '{direccion}' )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+
+    (StatusCode::OK, "Insert exitoso")
 }
 
 async fn add_user_to_group(
