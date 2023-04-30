@@ -36,6 +36,8 @@ struct LoginView: View {
     @State var user = ""
     @State var pass = ""
     
+    @State var registrarUsuario = false
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -57,24 +59,24 @@ struct LoginView: View {
                     
                     VStack(alignment: .center, spacing: 20) {
                         TextField("Username", text: $user)
-                        .frame(height: 20)
-                        .padding()
-                        .textFieldStyle(.plain)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(.white)
-                        )
-                        .textInputAutocapitalization(.never)
+                            .frame(height: 20)
+                            .padding()
+                            .textFieldStyle(.plain)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(.white)
+                            )
+                            .textInputAutocapitalization(.never)
                         
                         TextField("Password", text: $pass)
-                        .frame(height: 20)
-                        .padding()
-                        .textFieldStyle(.plain)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(.white)
-                        )
-                        .textInputAutocapitalization(.never)
+                            .frame(height: 20)
+                            .padding()
+                            .textFieldStyle(.plain)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(.white)
+                            )
+                            .textInputAutocapitalization(.never)
                     }
                     
                     Spacer()
@@ -97,19 +99,19 @@ struct LoginView: View {
                                 .padding()
                                 .frame(maxWidth: .infinity)
                         }
-                        .background(Color("blue_log_in"))
-                        .cornerRadius(10)
+                            .background(Color("blue_log_in"))
+                            .cornerRadius(10)
                         
                         Button(action: {
-                            // Sign in button tapped
+                            registrarUsuario.toggle()
                         }) {
                             Text("Sign In")
                                 .foregroundColor(.white)
                                 .padding()
                                 .frame(maxWidth: .infinity)
                         }
-                        .background(Color("blue_log_in"))
-                        .cornerRadius(10)
+                            .background(Color("blue_log_in"))
+                            .cornerRadius(10)
                     }
                     
                     Spacer()
