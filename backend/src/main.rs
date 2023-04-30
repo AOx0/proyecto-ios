@@ -1,8 +1,8 @@
 use axum::{
     debug_handler,
     extract::{Path, State},
-    http::{StatusCode},
-    response::{IntoResponse},
+    http::StatusCode,
+    response::IntoResponse,
     routing::{get, post},
     Json, Router, Server,
 };
@@ -25,7 +25,7 @@ struct Grupo {
     puntuacion_min: i64,
     id_owner: i32,
     nombre: String,
-    direccion: String
+    direccion: String,
 }
 
 #[allow(dead_code)]
@@ -82,7 +82,6 @@ struct GrupoCom {
     id_owner: i32,
     id_grupo: i64,
 }
-
 
 #[debug_handler]
 async fn register_user(
@@ -165,7 +164,7 @@ async fn new_group(
         puntuacion_min,
         id_owner,
         direccion,
-        nombre
+        nombre,
     } = grup;
 
     sqlx::query(&format!("INSERT INTO grupo (id_conductor, puntuacion_min, id_owner, nomrbre, direccion) VALUES ({id_conductor}, {puntuacion_min}, {id_owner},'{nombre}', '{direccion}' )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
@@ -175,21 +174,23 @@ async fn add_user_to_group(
     State(state): State<Arc<AppState>>,
     Path((id, id_grupo)): Path<(i64, i64)>,
 ) -> impl IntoResponse {
-    sqlx::query(&format!("INSERT INTO grupo_usuario (id_usuario, id_grupo) VALUES ({id}, {id_grupo})")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+    sqlx::query(&format!(
+        "INSERT INTO grupos_usuarios (id_usuario, id_grupo) VALUES ({id}, {id_grupo})"
+    ))
+    .execute(&mut state.db_pool.acquire().await.unwrap())
+    .await;
     (StatusCode::OK, "")
-
 }
 
 async fn remove_user_from_group(
     State(state): State<Arc<AppState>>,
-    Path((id, id_grupo)): Path<(i64, i64)>
+    Path((id, id_grupo)): Path<(i64, i64)>,
 ) -> impl IntoResponse {
     sqlx::query(&format!(
         "DELETE FROM grupos_usuarios WHERE id_usuario = '{id}' and id_grupo = '{id_grupo}' "
-        ))
-        .fetch_all(&mut state.db_pool.acquire().await.unwrap())
-        .await
-        .unwrap();
+    ))
+    .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+    .await;
 
     (StatusCode::OK, "")
 }
