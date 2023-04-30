@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::{
     debug_handler,
     extract::{Path, State},
@@ -8,9 +6,11 @@ use axum::{
     routing::{get, patch, post},
     Json, Router, Server,
 };
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::prelude::*;
+use std::sync::Arc;
 
 #[derive(Debug, FromRow)]
 struct Cliente {
@@ -22,9 +22,7 @@ struct Cliente {
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct Grupo {
     id_conductor: i32,
-    automovil: i64,
     puntuacion_min: i64,
-    id_grupo: i64,
     id_owner: i32,
 }
 
@@ -59,6 +57,30 @@ struct LogIn {
     password: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct User {
+    id: i64,
+    nombre: String,
+    apellido: String,
+    fecha_nacimiento: chrono::NaiveDate,
+    correo: String,
+    puntuacion: f32,
+    telefono: String,
+    licencia: Option<String>,
+    numero_de_viaj: i64,
+    calificacion_con: f32,
+    activo: bool,
+    password: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct GrupoCom {
+    id_conductor: i32,
+    puntuacion_min: i64,
+    id_owner: i32,
+    id_grupo: i64,
+}
+
 #[debug_handler]
 async fn register_user(
     State(state): State<Arc<AppState>>,
@@ -84,9 +106,18 @@ async fn register_user(
     if new_mail.is_empty() {
         sqlx::query(&format!("INSERT INTO usuario(nombre, apellido, fecha_nacimiento, correo, telefono, password) VALUES ('{nombre}', '{apellido}', '{fecha_nacimiento}', '{correo}', '{telefono}', '{password}')")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
 
-        (StatusCode::CREATED, "Usuario Creado")
+        let get_user: Vec<User> =
+            sqlx::query_as::<_, User>(&format!("SELECT * FROM usuario WHERE correo = '{correo}'"))
+                .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+                .await
+                .unwrap();
+
+        (
+            StatusCode::CREATED,
+            serde_json::to_string(get_user.first().unwrap()).unwrap(),
+        )
     } else {
-        (StatusCode::FOUND, "EL correo ya esta en uso")
+        (StatusCode::FOUND, "EL correo ya esta en uso".to_owned())
     }
 }
 
@@ -102,21 +133,57 @@ async fn login(State(state): State<Arc<AppState>>, Json(log): Json<LogIn>) -> im
     // println!("{:?}", login);
 
     if !login.is_empty() {
-        (StatusCode::ACCEPTED, "LogIn exitoso")
+        let user: Vec<User> = sqlx::query_as::<_, User>(&format!(
+            "SELECT * FROM usuario WHERE correo = '{correo}' and password = '{password}' "
+        ))
+        .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+        .await
+        .unwrap();
+
+        (
+            StatusCode::ACCEPTED,
+            serde_json::to_string(user.first().unwrap()).unwrap(),
+        )
     } else {
         (
             StatusCode::NON_AUTHORITATIVE_INFORMATION,
-            "Error en algun campo",
+            "Error en algun campo".to_owned(),
         )
     }
 }
 
-//async fn login2 (State(state): State<Arc<AppState>>, Path(id): Path<u64>)
-
-async fn create_group(
+async fn new_group(
     State(state): State<Arc<AppState>>,
-    Path((id_cond, auto, punt, grupo, owner)): Path<Vec<(i32, i64, i64, i64, i32)>>,
-) {
+    Json(grup): Json<Grupo>,
+) -> impl IntoResponse {
+    let Grupo {
+        id_conductor,
+        puntuacion_min,
+        id_owner,
+    } = grup;
+    println!("{:?}", grup);
+    sqlx::query(&format!("INSERT INTO grupo (id_conductor, puntuacion_min, id_owner) VALUES ({id_conductor}, {puntuacion_min}, {id_owner} )")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+}
+
+async fn add_user_to_group(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<i64>,
+) -> impl IntoResponse {
+}
+
+async fn get_user_groups(
+    Path(id): Path<u64>,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let groups: Vec<Grupo> = sqlx::query_as(&format!(
+        "SELECT * FROM grupos_usuarios JOIN grupo USING(id_grupo) WHERE id_usuario = {}",
+        id
+    ))
+    .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+    .await
+    .unwrap();
+
+    (StatusCode::OK, serde_json::to_string(&groups).unwrap())
 }
 
 #[debug_handler]
@@ -161,7 +228,9 @@ async fn main() {
     let router = Router::new()
         .route("/register", post(register_user))
         .route("/group/:id", get(get_group_info))
+        .route("/groups_of/:id", get(get_user_groups))
         .route("/login", post(login))
+        .route("/new_group", post(new_group))
         .with_state(state);
 
     Server::bind(&format!("{}:{}", address, port).parse().unwrap())
