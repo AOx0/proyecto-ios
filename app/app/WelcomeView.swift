@@ -62,7 +62,7 @@ struct GroupInfo: Codable {
     var id_owner: Int32
     
     static func group_info(id: Int64) async -> GroupInfo? {
-        let url = URL(string: "https://d27a-2806-2f0-9141-9600-92de-80ff-fe5b-9ace.ngrok.io/group/\(id)")!
+        let url = URL(string: "https://cf95-192-100-230-250.ngrok.io/group/\(id)")!
         if let (data, _) = (try? await URLSession.shared.data(from: url) ) {
             let info = try? JSONDecoder().decode(GroupInfo.self, from: data)
             return info

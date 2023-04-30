@@ -11,7 +11,7 @@ struct UserLoginInfo: Encodable {
     var password: String
     
     static func login(user: String, pass: String) async -> Bool {
-        let url = URL(string: "https://d27a-2806-2f0-9141-9600-92de-80ff-fe5b-9ace.ngrok.io/login")!
+        let url = URL(string: "https://cf95-192-100-230-250.ngrok.io/login")!
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -116,6 +116,9 @@ struct LoginView: View {
                     
                     Spacer()
                 }.padding()
+                    .sheet(isPresented: $registrarUsuario) {
+                        SignupView(is_presented: $registrarUsuario)
+                    }
             }
         }
     }
