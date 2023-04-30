@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::{
     debug_handler,
     extract::{Path, State},
@@ -8,9 +6,11 @@ use axum::{
     routing::{get, patch, post},
     Json, Router, Server,
 };
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::prelude::*;
+use std::sync::Arc;
 
 #[derive(Debug, FromRow)]
 struct Cliente {
@@ -62,7 +62,7 @@ struct User {
     id: i64,
     nombre: String,
     apellido: String,
-    fecha_nacimiento: String,
+    fecha_nacimiento: chrono::NaiveDate,
     correo: String,
     puntuacion: f32,
     telefono: String,
@@ -106,12 +106,11 @@ async fn register_user(
     if new_mail.is_empty() {
         sqlx::query(&format!("INSERT INTO usuario(nombre, apellido, fecha_nacimiento, correo, telefono, password) VALUES ('{nombre}', '{apellido}', '{fecha_nacimiento}', '{correo}', '{telefono}', '{password}')")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
 
-        let get_user: Vec<Correo> = sqlx::query_as::<_, Correo>(&format!(
-            "SELECT * FROM usuario WHERE correo = '{correo}'"
-        ))
-        .fetch_all(&mut state.db_pool.acquire().await.unwrap())
-        .await
-        .unwrap();
+        let get_user: Vec<User> =
+            sqlx::query_as::<_, User>(&format!("SELECT * FROM usuario WHERE correo = '{correo}'"))
+                .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+                .await
+                .unwrap();
 
         (
             StatusCode::CREATED,
