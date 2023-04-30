@@ -1,14 +1,14 @@
 //
-//  _243179_projectoApp.swift
-//  0243179_projecto
+//  appApp.swift
+//  app
 //
-//  Created by iOS Lab on 29/04/23.
+//  Created by Alejandro D on 30/04/23.
 //
 
 import SwiftUI
 
 @main
-struct _243179_projectoApp: App {
+struct appApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
