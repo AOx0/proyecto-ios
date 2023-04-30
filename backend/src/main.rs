@@ -62,13 +62,13 @@ struct User {
     id: i64,
     nombre: String,
     apellido: String,
-    fecha_nacimiento: chrono::NaiveDate,
+    fecha_nacimiento: String,
     correo: String,
     puntuacion: f32,
     telefono: String,
     licencia: Option<String>,
-    numero_de_viaj: i64,
-    calificacion_con: f32,
+    numero_de_viajes: i64,
+    calificacion_conductor: f32,
     activo: bool,
     password: String,
 }
@@ -78,6 +78,11 @@ struct GrupoCom {
     id_conductor: i32,
     puntuacion_min: i64,
     id_owner: i32,
+    id_grupo: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct Grub {
     id_grupo: i64,
 }
 
@@ -139,6 +144,7 @@ async fn login(State(state): State<Arc<AppState>>, Json(log): Json<LogIn>) -> im
         .fetch_all(&mut state.db_pool.acquire().await.unwrap())
         .await
         .unwrap();
+        println!("{:?}", user);
 
         (
             StatusCode::ACCEPTED,
@@ -176,8 +182,7 @@ async fn get_user_groups(
     State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
     let groups: Vec<Grupo> = sqlx::query_as(&format!(
-        "SELECT * FROM grupos_usuarios JOIN grupo USING(id_grupo) WHERE id_usuario = {}",
-        id
+        "SELECT * FROM grupos_usuarios JOIN grupo USING(id_grupo) WHERE id_usuario = {id}",
     ))
     .fetch_all(&mut state.db_pool.acquire().await.unwrap())
     .await
