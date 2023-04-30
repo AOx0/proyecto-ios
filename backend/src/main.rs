@@ -25,7 +25,7 @@ struct Grupo {
     automovil: i64,
     puntuacion_min: i64,
     id_grupo: i64,
-    id_usuarios: Option<i32>,
+    id_owner: i32,
 }
 
 #[allow(dead_code)]
@@ -99,7 +99,7 @@ async fn login(State(state): State<Arc<AppState>>, Json(log): Json<LogIn>) -> im
     .fetch_all(&mut state.db_pool.acquire().await.unwrap())
     .await
     .unwrap();
-    println!("{:?}", login);
+    // println!("{:?}", login);
 
     if !login.is_empty() {
         (StatusCode::ACCEPTED, "LogIn exitoso")
@@ -113,22 +113,32 @@ async fn login(State(state): State<Arc<AppState>>, Json(log): Json<LogIn>) -> im
 
 //async fn login2 (State(state): State<Arc<AppState>>, Path(id): Path<u64>)
 
-// async fn create_group(State(state): State<Arc<AppState>>, Path(()): Path<u64>)) {}
+async fn create_group(
+    State(state): State<Arc<AppState>>,
+    Path((id_cond, auto, punt, grupo, owner)): Path<Vec<(i32, i64, i64, i64, i32)>>,
+) {
+}
 
 #[debug_handler]
-async fn get_group_info(State(state): State<Arc<AppState>>, Path(id): Path<u64>) -> Html<String> {
+async fn get_group_info(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<u64>,
+) -> impl IntoResponse {
     let grupo: Vec<Grupo> =
         sqlx::query_as::<_, Grupo>(&format!("SELECT * FROM grupo WHERE id_grupo = {id}"))
             .fetch_all(&mut state.db_pool.acquire().await.unwrap())
             .await
             .unwrap();
+    println!("{:?}", grupo);
 
-    Html(
-        grupo
-            .first()
-            .map(|first| serde_json::to_string(first).unwrap())
-            .unwrap_or(String::new()),
-    )
+    if grupo.is_empty() {
+        (StatusCode::NO_CONTENT, "No se encontro el Id".to_owned())
+    } else {
+        (
+            StatusCode::OK,
+            serde_json::to_string(grupo.first().unwrap()).unwrap(),
+        )
+    }
 }
 
 struct AppState {
