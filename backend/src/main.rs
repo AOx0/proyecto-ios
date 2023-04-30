@@ -22,9 +22,7 @@ struct Cliente {
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct Grupo {
     id_conductor: i32,
-    automovil: i64,
     puntuacion_min: i64,
-    id_grupo: i64,
     id_owner: i32,
 }
 
@@ -111,12 +109,30 @@ async fn login(State(state): State<Arc<AppState>>, Json(log): Json<LogIn>) -> im
     }
 }
 
-//async fn login2 (State(state): State<Arc<AppState>>, Path(id): Path<u64>)
-
-async fn create_group(
+async fn new_group(
     State(state): State<Arc<AppState>>,
-    Path((id_cond, auto, punt, grupo, owner)): Path<Vec<(i32, i64, i64, i64, i32)>>,
-) {
+    Json(grup): Json<Grupo>,
+) -> impl IntoResponse {
+    let Grupo {
+        id_conductor,
+        puntuacion_min,
+        id_owner,
+    } = grup;
+}
+
+async fn get_user_groups(
+    Path(id): Path<u64>,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let groups: Vec<Grupo> = sqlx::query_as(&format!(
+        "SELECT * FROM grupos_usuarios JOIN grupo USING(id_grupo) WHERE id_usuario = {}",
+        id
+    ))
+    .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+    .await
+    .unwrap();
+
+    (StatusCode::OK, serde_json::to_string(&groups).unwrap())
 }
 
 #[debug_handler]
@@ -161,6 +177,7 @@ async fn main() {
     let router = Router::new()
         .route("/register", post(register_user))
         .route("/group/:id", get(get_group_info))
+        .route("/groups_of/:id", get(get_user_groups))
         .route("/login", post(login))
         .with_state(state);
 
