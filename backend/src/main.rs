@@ -264,6 +264,21 @@ async fn get_group_info(
     }
 }
 
+#[debug_handler]
+async fn get_users_info(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<u64>,
+) -> impl IntoResponse {
+    let groups: Vec<User> = sqlx::query_as(&format!(
+        "SELECT * FROM grupos_usuarios JOIN usuario on id_usuario = id  WHERE id_grupo = {id}"
+    ))
+    .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+    .await
+    .unwrap();
+    println!("{:?}", groups);
+
+    (StatusCode::OK, serde_json::to_string(&groups).unwrap())
+}
 struct AppState {
     db_pool: sqlx::postgres::PgPool,
 }
@@ -277,7 +292,6 @@ async fn main() {
             .await
             .unwrap(),
     });
-
     let address = std::env::var("BK_ADDRESS").unwrap_or("0.0.0.0".to_owned());
     let port = std::env::var("BK_PORT").unwrap_or("9090".to_owned());
 
@@ -289,6 +303,7 @@ async fn main() {
         .route("/new_group", post(new_group))
         .route("/r_group/:id/:group", get(remove_user_from_group))
         .route("/a_group/:id/:group", get(add_user_to_group))
+        .route("/users_of/:id", get(get_users_info))
         .with_state(state);
 
     Server::bind(&format!("{}:{}", address, port).parse().unwrap())
