@@ -44,7 +44,19 @@ struct RegisterUser {
     fecha_nacimiento: String,
     correo: String,
     telefono: String,
+    password: String,
     // licencia: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct Correo {
+    correo: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct LogIn {
+    correo: String,
+    password: String,
 }
 
 #[debug_handler]
@@ -58,12 +70,50 @@ async fn register_user(
         fecha_nacimiento,
         correo,
         telefono,
+        password,
         // licencia,
     } = new_user;
-    sqlx::query(&format!("INSERT INTO usuario(nombre, apellido, fecha_nacimiento, correo, telefono) VALUES ('{nombre}', '{apellido}', '{fecha_nacimiento}', '{correo}', '{telefono}')")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
 
-    (StatusCode::CREATED, ())
+    let new_mail: Vec<Correo> = sqlx::query_as::<_, Correo>(&format!(
+        "SELECT correo FROM usuario WHERE correo = '{correo}'"
+    ))
+    .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+    .await
+    .unwrap();
+
+    if new_mail.is_empty() {
+        sqlx::query(&format!("INSERT INTO usuario(nombre, apellido, fecha_nacimiento, correo, telefono, password) VALUES ('{nombre}', '{apellido}', '{fecha_nacimiento}', '{correo}', '{telefono}', '{password}')")).execute(&mut state.db_pool.acquire().await.unwrap()).await.unwrap();
+
+        (StatusCode::CREATED, "Usuario Creado")
+    } else {
+        (StatusCode::FOUND, "EL correo ya esta en uso")
+    }
 }
+
+async fn login(State(state): State<Arc<AppState>>, Json(log): Json<LogIn>) -> impl IntoResponse {
+    let LogIn { correo, password } = log;
+
+    let login: Vec<LogIn> = sqlx::query_as::<_, LogIn>(&format!(
+        "SELECT correo, password FROM usuario WHERE correo = '{correo}' and password = '{password}' "
+    ))
+    .fetch_all(&mut state.db_pool.acquire().await.unwrap())
+    .await
+    .unwrap();
+    println!("{:?}", login);
+
+    if !login.is_empty() {
+        (StatusCode::ACCEPTED, "LogIn exitoso")
+    } else {
+        (
+            StatusCode::NON_AUTHORITATIVE_INFORMATION,
+            "Error en algun campo",
+        )
+    }
+}
+
+//async fn login2 (State(state): State<Arc<AppState>>, Path(id): Path<u64>)
+
+// async fn create_group(State(state): State<Arc<AppState>>, Path(()): Path<u64>)) {}
 
 #[debug_handler]
 async fn get_group_info(State(state): State<Arc<AppState>>, Path(id): Path<u64>) -> Html<String> {
@@ -101,6 +151,7 @@ async fn main() {
     let router = Router::new()
         .route("/register", post(register_user))
         .route("/group/:id", get(get_group_info))
+        .route("/login", post(login))
         .with_state(state);
 
     Server::bind(&format!("{}:{}", address, port).parse().unwrap())
