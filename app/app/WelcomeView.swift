@@ -2,78 +2,64 @@
 //  WelcomeView.swift
 //  app
 //
-//  Created by Alejandro D on 30/04/23.
+//  Created by Alejandro D on 05/05/23.
 //
 
 import SwiftUI
 
-struct WelcomeView: View {
-    @Binding var showing: Bool
+struct User {
+    var first_name: String = ""
+    var last_name: String = ""
+    var email: String = ""
+    var gravatar: String = ""
+    var gravatar_md5: String = ""
+    
+    public mutating func reset() {
+        self = User()
+    }
+}
+
+struct Collection: Identifiable {
+    var id: String
+    var name: String
+    var tags: [String]
+}
+
+struct NavButton: View {
+    var title: String
+    var image: String
+    var action: () -> Void
     
     var body: some View {
-        ZStack{
-            Color("blue_principal")
-                .ignoresSafeArea()
-            
+        Button(action: action){
             VStack {
-                HStack {
-                    VStack(alignment: .leading, spacing: 30) {
-                        Text("Bienvenido")
-                            .bold()
-                            .font(.largeTitle)
-                        
-                        VStack(alignment: .leading) {
-                            Text("Mismo destino?")
-                                .font(.title2)
-                                .bold()
-                            
-                            Text("Comparte tu viaje y fluye")
-                                .font(.title2)
-                                .bold()
-                            
-                            Text("- Contaminación")
-                                .font(.title2)
-                                .bold()
-                            Text("- Trafico")
-                                .font(.title2)
-                                .bold()
-                            Text("+ Comodidad")
-                                .font(.title2)
-                                .bold()
-                        }
-                        
-                        Spacer()
-
-                            
-                    }
-                    .foregroundColor(Color("white"))
-                    
-                    Spacer()
-                }
-                
-                Spacer()
-            
-                Button(action: {
-                    showing = false
-                    UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
-                }) {
-                    Text("Done")
-                        .foregroundColor(.white)
-                        .padding()
-                        .bold()
-                        .frame(maxWidth: .infinity)
-                }
-                .background(Color("blue_log_in"))
-                .cornerRadius(10)
-                
-            }.padding()
+                Image(systemName: image)
+                Text(title)
+                    .font(.footnote)
+            }
         }
     }
 }
 
-struct WelcomeView_Previews: PreviewProvider {
-    @State static var show: Bool = true
-    static var previews: some View {
-        WelcomeView(showing: $show)
+struct WelcomeView: View {
+    @Binding var user: User
+    @State var collections = [Collection]()
+    
+    var body: some View {
+        VStack {
+            ForEach($collections) { collection in
+                VStack {
+                    Text("\(collection.name.wrappedValue)")
+                    HStack {
+                        ForEach(collection.tags, id: \.self) { tag in
+                            Text("\(tag.wrappedValue)")
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        
     }
 }
+
