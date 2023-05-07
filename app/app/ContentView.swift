@@ -10,7 +10,10 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @State var user = User()
+    @State var image: Image? = nil
+    
     @State var client = SurrealDBClient(url: "http://187.208.119.8:8000")
+    
     @State var email = "daniel@gmail.com"
     @State var pass = "1234"
     
@@ -69,7 +72,7 @@ struct ContentView: View {
                         .navigationTitle("Library")
                 case 3: SearchView()
                         .navigationTitle("Search")
-                case 4: UserView(user: $user)
+                case 4: UserView(user: $user, img: $image)
                         .navigationTitle("Account")
                         .toolbar {
                             ToolbarItem(placement: .navigationBarTrailing) {

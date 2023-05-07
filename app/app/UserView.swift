@@ -7,21 +7,39 @@
 
 import SwiftUI
 
+struct Img {
+    var image: Image
+    
+    init(image: Image, stored_image: inout Image?) {
+        self.image = image
+        stored_image = self.image
+    }
+    
+    var body: some View {
+        image
+            .resizable()
+            .scaledToFit()
+            .clipShape(Circle())
+    }
+}
+
 struct UserView: View {
     @Binding var user: User
+    @Binding var img: Image?
     var body: some View {
         VStack {
             HStack(alignment: .center, spacing: 20) {
-                AsyncImage(url: URL(string: "https://www.gravatar.com/avatar/\(user.gravatar_md5)?s=500")) { phase in
+                AsyncImage(url: URL(string: "https://www.gravatar.com/avatar/\(user.gravatar_md5)?s=100")) { phase in
                     switch phase {
                     case .empty:
-                        Circle()
-                            .foregroundColor(Color.gray.opacity(0.1))
+                        if let image = img {
+                            Img(image: image, stored_image: &img).body
+                        } else {
+                            Circle()
+                                .foregroundColor(Color.gray.opacity(0.1))
+                        }
                     case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(Circle())
+                        Img(image: image, stored_image: &img).body
                     case .failure:
                         Circle()
                             .foregroundColor(.red) // or any error indicator you prefer
@@ -31,6 +49,7 @@ struct UserView: View {
                     }
                 }
                 .frame(width: 60, height:  60)
+                
                 VStack(alignment: .leading) {
                     HStack(alignment: .center) {
                         Text(user.first_name)
@@ -54,6 +73,8 @@ struct UserView: View {
                 }
                 Spacer()
             }
+            
+            Divider()
         }
         .padding()
     }
