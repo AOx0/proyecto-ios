@@ -2,3 +2,7 @@
 .DS_Store
 
 backend/Cargo.lock
+
+history.txt
+
+nohup.out

@@ -18,6 +18,7 @@
 		A91FA01F2A06F11A007ECE37 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91FA01E2A06F11A007ECE37 /* UserView.swift */; };
 		A91FA0212A06F178007ECE37 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91FA0202A06F178007ECE37 /* SearchView.swift */; };
 		A9BB03032A06DB590093A6AC /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BB03022A06DB590093A6AC /* LibraryView.swift */; };
+		A9BCAE9F2A0AF63400DC3A0C /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BCAE9E2A0AF63400DC3A0C /* CardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		A91FA01E2A06F11A007ECE37 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		A91FA0202A06F178007ECE37 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		A9BB03022A06DB590093A6AC /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		A9BCAE9E2A0AF63400DC3A0C /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 				A91AC4232A04BCB9004B7916 /* ContentView.swift */,
 				A91FA0202A06F178007ECE37 /* SearchView.swift */,
 				A91FA01E2A06F11A007ECE37 /* UserView.swift */,
+				A9BCAE9E2A0AF63400DC3A0C /* CardView.swift */,
 				A91AC42F2A04BD61004B7916 /* SurrealDB.swift */,
 				A91AC4252A04BCC0004B7916 /* Assets.xcassets */,
 				A91AC4272A04BCC0004B7916 /* Preview Content */,
@@ -164,6 +167,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A91AC4302A04BD61004B7916 /* SurrealDB.swift in Sources */,
+				A9BCAE9F2A0AF63400DC3A0C /* CardView.swift in Sources */,
 				A91AC4242A04BCB9004B7916 /* ContentView.swift in Sources */,
 				A91AC4222A04BCB9004B7916 /* appApp.swift in Sources */,
 				A91AC4372A04E08E004B7916 /* CreateCollection.swift in Sources */,

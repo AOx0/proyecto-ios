@@ -29,26 +29,30 @@ struct UserView: View {
     var body: some View {
         VStack {
             HStack(alignment: .center, spacing: 20) {
-                AsyncImage(url: URL(string: "https://www.gravatar.com/avatar/\(user.gravatar_md5)?s=100")) { phase in
-                    switch phase {
-                    case .empty:
-                        if let image = img {
-                            Img(image: image, stored_image: &img).body
-                        } else {
-                            Circle()
-                                .foregroundColor(Color.gray.opacity(0.1))
+                // Si ya tenemos la imagen no la volvemos a descargar, al menos durante el resto
+                // de esta corrida
+                if let image = img {
+                    Img(image: image, stored_image: &img).body
+                        .frame(width: 60, height:  60)
+                } else {
+                    AsyncImage(url: URL(string: "https://www.gravatar.com/avatar/\(user.gravatar_md5)?s=100")) { phase in
+                        switch phase {
+                            case .empty:
+                                Circle()
+                                    .foregroundColor(Color.gray.opacity(0.1))
+                            case .success(let image):
+                                Img(image: image, stored_image: &img).body // Guardamos y motramos
+                            case .failure:
+                                Circle()
+                                    .foregroundColor(.red)
+                            @unknown default:
+                                Circle()
+                                    .foregroundColor(.red)
                         }
-                    case .success(let image):
-                        Img(image: image, stored_image: &img).body
-                    case .failure:
-                        Circle()
-                            .foregroundColor(.red) // or any error indicator you prefer
-                    @unknown default:
-                        Circle()
-                            .foregroundColor(.red) // or any unknown indicator you prefer
                     }
+                    .frame(width: 60, height:  60)
                 }
-                .frame(width: 60, height:  60)
+                
                 
                 VStack(alignment: .leading) {
                     HStack(alignment: .center) {
@@ -59,14 +63,14 @@ struct UserView: View {
                     }
                     HStack {
                         Image(systemName: "envelope.fill")
-                        Text(user.email)
+                        Text(user.email.isEmpty ? "No mail registered" : user.email)
                            
                     }
                     .font(.footnote)
                     
                     HStack {
                         Image(systemName: "photo.fill")
-                        Text(user.gravatar)
+                        Text(user.gravatar.isEmpty ? "No gravatar registered" : user.gravatar)
                            
                     }
                     .font(.footnote)
@@ -75,6 +79,18 @@ struct UserView: View {
             }
             
             Divider()
+            
+            HStack {
+                Text("Your collections")
+                    .bold()
+                Spacer()
+            }
+            
+            ScrollView {
+                CardView(title: "Title", author: "AOx0", desc: "Description")
+            }
+            
+            Spacer()
         }
         .padding()
     }

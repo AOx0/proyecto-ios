@@ -21,10 +21,10 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            if user.email != "" {
-                AppView()
-            } else {
+            if user.email.isEmpty {
                 LoginView()
+            } else {
+                AppView()
             }
         }
     }
@@ -39,25 +39,32 @@ struct ContentView: View {
                 .textInputAutocapitalization(.never)
                 .textFieldStyle(.roundedBorder)
             
-            Button("Test") {
-                Task {
-                    if (try? await client.login(mail: email, pass: pass)) != nil {
-                        guard let res = try? await client.user_query(query: "SELECT email, first_name, last_name, gravatar, gravatar_md5 FROM $auth.id").intoJSON() else {
-                            return
+            HStack {
+                Button("Log In") {
+                    Task {
+                        if (try? await client.login(mail: email, pass: pass)) != nil {
+                            guard let res = try? await client.user_query(query: "SELECT email, first_name, last_name, gravatar, gravatar_md5 FROM $auth.id").intoJSON() else {
+                                return
+                            }
+                            
+                            let info = res[0]["result"][0]
+                            user.email = info["email"].stringValue
+                            user.first_name = info["first_name"].stringValue
+                            user.last_name = info["last_name"].stringValue
+                            user.gravatar = info["gravatar"].stringValue
+                            user.gravatar_md5 = info["gravatar_md5"].stringValue
+                            currentView = 1
+                            
+                            email = ""
+                            pass = ""
                         }
-                        
-                        let info = res[0]["result"][0]
-                        user.email = info["email"].stringValue
-                        user.first_name = info["first_name"].stringValue
-                        user.last_name = info["last_name"].stringValue
-                        user.gravatar = info["gravatar"].stringValue
-                        user.gravatar_md5 = info["gravatar_md5"].stringValue
-                        currentView = 1
-                        
-                        email = ""
-                        pass = ""
                     }
                 }
+                .buttonStyle(.borderedProminent)
+                Button("Register") {
+                    
+                }
+                .buttonStyle(.borderedProminent)
             }
         }.padding()
     }
@@ -77,8 +84,10 @@ struct ContentView: View {
                         .toolbar {
                             ToolbarItem(placement: .navigationBarTrailing) {
                                 Button("Log out") {
+                                    // Borrar toda la información del usuario del estado
                                     client.reset_auth()
                                     user.reset()
+                                    image = nil
                                 }
                             }
                         }
