@@ -5,7 +5,8 @@
 ///     email: string
 ///     pass: string
 ///     gravatar: string
-///     gravatar_md5: string
+///     gravatar_md5: string,
+///     erased: bool
 ///
 BEGIN;
 
@@ -19,12 +20,13 @@ DELETE user;
 DEFINE TABLE user SCHEMAFULL
     PERMISSIONS
         FOR select FULL
-        FOR create, update, delete WHERE id = $auth.id
+        FOR create, update WHERE id = $auth.id
+        FOR delete NONE
 ;
 
-// El id no es modificable, el usuario no puede verlo ni actualizarlo
-DEFINE FIELD id ON TABLE user PERMISSIONS 
-    FOR select, create, update, delete NONE
+DEFINE FIELD id ON user PERMISSIONS 
+    FOR create, update, delete NONE
+    FOR select FULL
 ;
 
 // Define first_name and last_name
@@ -58,6 +60,15 @@ DEFINE FIELD gravatar_md5 ON TABLE user
 DEFINE FIELD pass ON TABLE user PERMISSIONS FOR select NONE;
 
 // Por defecto las suscripciones son privadas
-DEFINE FIELD public_sus ON TABLE user VALUE $value OR false;
+DEFINE FIELD public_sus ON user TYPE bool VALUE $value OR false;
+
+// Si este campo tiene valor true se borra el usuario y todo lo que creó.
+DEFINE FIELD erased ON user TYPE bool VALUE $value OR false;
+
+// Cuando user.event es true se borran todos sus articulos y el usuario en si
+DEFINE EVENT delete_user_collections ON user WHEN $event = "UPDATE" AND $after.erased = true THEN {
+    DELETE collection WHERE <-owns<-(user WHERE id = type::thing($before.id));
+    DELETE type::thing($after.id);
+};
 
 COMMIT;

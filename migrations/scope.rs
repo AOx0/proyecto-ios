@@ -28,14 +28,6 @@ CREATE user:daniel
         last_name="Osornio"
 ;
 
-CREATE collection:col1
-    SET
-        name = "My Collection",
-        autor = user:daniel,
-        cards = [],
-        public = true
-;
-
 CREATE user:david
     SET
         email = "david@gmail.com",
