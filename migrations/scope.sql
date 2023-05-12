@@ -1,6 +1,6 @@
 BEGIN;
 
-// Define /signup and /signin endpoints
+-- Define /signup and /signin endpoints
 DEFINE SCOPE account SESSION 24h
     SIGNUP (
         CREATE type::thing("user", string::trim($user))
@@ -17,7 +17,7 @@ DEFINE SCOPE account SESSION 24h
     )
 ;
 
-// Creamos algunos usuarios de prueba
+-- Creamos algunos usuarios de prueba
 CREATE user:daniel
     SET
         email = "daniel@gmail.com",

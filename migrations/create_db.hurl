@@ -4,7 +4,7 @@ ns: proyecto_ios
 db: proyecto
 [BasicAuth]
 root: root
-file,user.rs;
+file,user.sql;
 HTTP 200
 
 
@@ -15,7 +15,7 @@ db: proyecto
 [BasicAuth]
 root: root
 
-file,collection.rs;
+file,collection.sql;
 HTTP 200
 
 
@@ -26,7 +26,7 @@ db: proyecto
 [BasicAuth]
 root: root
 
-file,scope.rs;
+file,scope.sql;
 HTTP 200
 
 POST http://localhost:8000/sql
@@ -36,5 +36,5 @@ db: proyecto
 [BasicAuth]
 root: root
 
-file,owns.rs;
+file,owns.sql;
 HTTP 200
