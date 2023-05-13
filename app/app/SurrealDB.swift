@@ -9,7 +9,7 @@ import Foundation
 import SwiftyJSON
 
 enum SurrealError: Error {
-    case InvalidUrl, SessionError, Ok, No200Response(Data, URLResponse)
+    case InvalidUrl, SessionError, Ok, No200Response(JSON, URLResponse)
 }
 
 struct Response {
@@ -59,8 +59,8 @@ struct SurrealDBClient {
 
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
-        req.addValue("test", forHTTPHeaderField: "NS")
-        req.addValue("test", forHTTPHeaderField: "DB")
+        req.addValue("proyecto_ios", forHTTPHeaderField: "NS")
+        req.addValue("proyecto", forHTTPHeaderField: "DB")
         req.addValue("account", forHTTPHeaderField: "SC")
         req.addValue("application/json", forHTTPHeaderField: "Accept")
         
@@ -72,8 +72,8 @@ struct SurrealDBClient {
         
         req.httpBody = #"""
         {
-          "NS": "test",
-          "DB": "test",
+          "NS": "proyecto_ios",
+          "DB": "proyecto",
           "SC": "account",
           "email": "\#(mail)",
           "pass": "\#(pass)",
@@ -86,7 +86,7 @@ struct SurrealDBClient {
         }
   
         if (res as? HTTPURLResponse)?.statusCode != 200 {
-            throw SurrealError.No200Response(data, res)
+            throw SurrealError.No200Response(try! JSON(data: data), res)
         }
 
         let json = try! JSON(data: data)
@@ -99,8 +99,8 @@ struct SurrealDBClient {
 
         req.httpBody = #"""
         {
-          "NS": "test",
-          "DB": "test",
+          "NS": "proyecto_ios",
+          "DB": "proyecto",
           "SC": "account",
           "email": "\#(mail)",
           "pass": "\#(pass)"
@@ -112,7 +112,7 @@ struct SurrealDBClient {
         }
 
         if (res as? HTTPURLResponse)?.statusCode != 200 {
-            throw SurrealError.No200Response(data, res)
+            throw SurrealError.No200Response(try! JSON(data: data), res)
         }
 
         let json = try! JSON(data: data)
@@ -134,7 +134,7 @@ struct SurrealDBClient {
         }
 
         if (res as? HTTPURLResponse)?.statusCode != 200 {
-            throw SurrealError.No200Response(data, res)
+            throw SurrealError.No200Response(try! JSON(data: data), res)
         }
 
         return data

@@ -9,23 +9,21 @@ import SwiftUI
 
 struct CardView: View {
     @Environment(\.colorScheme) var colorScheme
-    
-    let title: String
-    let author: String
-    let desc: String
+    @Binding var collection: Collection
+
     var body: some View {
         NavigationLink {
             Text("Card info")
         } label: {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading) {
-                    Text(title)
+                    Text(collection.name)
                         .font(.headline)
-                    Text("by \(author)")
+                    Text("by \(collection.author.replacingOccurrences(of: "user:", with: ""))")
                         .font(.footnote)
                 }
                 Spacer()
-                Text(desc)
+                Text(collection.description)
                     .font(.footnote)
             }
             .padding()

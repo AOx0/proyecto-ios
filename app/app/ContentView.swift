@@ -43,11 +43,15 @@ struct ContentView: View {
                 Button("Log In") {
                     Task {
                         if (try? await client.login(mail: email, pass: pass)) != nil {
-                            guard let res = try? await client.user_query(query: "SELECT email, first_name, last_name, gravatar, gravatar_md5 FROM $auth.id").intoJSON() else {
+                            guard let res = try? await client.user_query(query: "SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").intoJSON() else {
                                 return
                             }
                             
+                            print(client.auth)
+                            print(res)
+                            
                             let info = res[0]["result"][0]
+                            user.id = info["id"].stringValue
                             user.email = info["email"].stringValue
                             user.first_name = info["first_name"].stringValue
                             user.last_name = info["last_name"].stringValue
@@ -73,13 +77,13 @@ struct ContentView: View {
         return NavigationView {
             VStack {
                 switch currentView {
-                case 1: WelcomeView(user: $user)
+                case 1: WelcomeView(client: $client, user: $user)
                         .navigationTitle("Bienvenido, \(user.first_name.capitalized)".trimmingCharacters(in: [" ", ","]) + "!")
                 case 2: LibraryView()
                         .navigationTitle("Library")
                 case 3: SearchView()
                         .navigationTitle("Search")
-                case 4: UserView(user: $user, img: $image)
+                case 4: UserView(client: $client, user: $user, img: $image)
                         .navigationTitle("Account")
                         .toolbar {
                             ToolbarItem(placement: .navigationBarTrailing) {
@@ -91,7 +95,7 @@ struct ContentView: View {
                                 }
                             }
                         }
-                default: WelcomeView(user: $user)
+                default: WelcomeView(client: $client, user: $user)
                 }
                 Spacer()
                 HStack(alignment: .bottom) {

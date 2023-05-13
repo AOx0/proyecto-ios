@@ -24,8 +24,11 @@ struct Img {
 }
 
 struct UserView: View {
+    @Binding var client: SurrealDBClient
+    
     @Binding var user: User
     @Binding var img: Image?
+    
     var body: some View {
         VStack {
             HStack(alignment: .center, spacing: 20) {
@@ -87,11 +90,34 @@ struct UserView: View {
             }
             
             ScrollView {
-                CardView(title: "Title", author: "AOx0", desc: "Description")
+                VStack {
+                    ForEach(user.my_collections, id: \.self) { collection in
+                        CardView(collection: $user.my_collections[user.my_collections.firstIndex(of: collection)!] )
+                    }
+                }
             }
             
             Spacer()
         }
         .padding()
+        .onAppear() {
+            Task{
+                guard let res = try? await client.user_query(query: "SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
+                    return
+                }
+                
+                user.my_collections.removeAll()
+                for col in res.arrayValue {
+                    user.my_collections.append(
+                        Collection(
+                            id: col["id"].stringValue,
+                            name: col["name"].stringValue,
+                            author: user.id,
+                            description: col["description"].stringValue
+                        )
+                    )
+                }
+            }
+        }
     }
 }

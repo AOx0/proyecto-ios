@@ -7,13 +7,13 @@ DEFINE SCOPE account SESSION 24h
         SET
             email = $email,
             pass = crypto::argon2::generate($pass),
+            gravatar = "",
+            gravatar_md5 = "",
             first_name="",
             last_name=""
     )
     SIGNIN (
-        SELECT * FROM user
-            WHERE email = $email
-                AND crypto::argon2::compare(pass, $pass)
+        SELECT * FROM user WHERE email = $email
     )
 ;
 
