@@ -15,23 +15,29 @@ struct User {
     var gravatar: String = ""
     var gravatar_md5: String = ""
     
-    var my_collections: [Collection] = [Collection]()
-    var collections: [Collection] = [Collection]()
+    var own_collections = [Collection]()
+    var sus_collections = [Collection]()
+    var rec_collections = [Collection]()
     
     public mutating func reset() {
         self = User()
     }
 }
 
-struct Collection: Identifiable, Equatable, Hashable {
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
+struct Collection: Equatable {
     var id: String
     var name: String
     var author: String
     var description: String
+    var user_owned = false
+    var is_suscribed = false
+    var cards: [Card] = [Card]()
+}
+
+struct Card: Equatable {
+    var id: String
+    var sentence: String
+    var answer: String
 }
 
 struct NavButton: View {
@@ -58,35 +64,38 @@ struct WelcomeView: View {
         VStack {
             ScrollView {
                 VStack {
-                    ForEach(user.collections, id: \.self) { collection in
-                        CardView(collection: $user.collections[user.collections.firstIndex(of: collection)!] )
+                    ForEach(user.rec_collections, id: \.self.id) { collection in
+                        CardView(
+                            collection: $user.rec_collections[user.rec_collections.firstIndex(of: collection)!],
+                            client: $client,
+                            user: $user
+                        )
                     }
                 }
             }
             
             Spacer()
         }
-        .padding()
         .onAppear() {
             Task{
-                guard let res = try? await client.user_query(query: "SELECT * FROM collection WHERE <-owns<-(user WHERE id != $auth.id)").intoJSON()[0]["result"] else {
+                guard let res = try? await client.user_query(query: "SELECT *, (<-owns<-user.id)[0] AS owner, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS sus FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").intoJSON()[0]["result"] else {
                     return
                 }
                 
-                user.collections.removeAll()
+                user.rec_collections.removeAll()
                 for col in res.arrayValue {
-                    user.collections.append(
+                    user.rec_collections.append(
                         Collection(
                             id: col["id"].stringValue,
                             name: col["name"].stringValue,
-                            author: "",
-                            description: col["description"].stringValue
+                            author: col["owner"].stringValue,
+                            description: col["description"].stringValue,
+                            is_suscribed: col["sus"].boolValue
                         )
                     )
                 }
             }
         }
-        
     }
 }
 

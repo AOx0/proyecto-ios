@@ -17,6 +17,12 @@ DEFINE SCOPE account SESSION 24h
     )
 ;
 
+DEFINE SCOPE account_short SESSION 5m
+    SIGNIN (
+        SELECT * FROM user WHERE email = $email
+    )
+;
+
 -- Creamos algunos usuarios de prueba
 CREATE user:daniel
     SET

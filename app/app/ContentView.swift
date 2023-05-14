@@ -43,14 +43,13 @@ struct ContentView: View {
                 Button("Log In") {
                     Task {
                         if (try? await client.login(mail: email, pass: pass)) != nil {
-                            guard let res = try? await client.user_query(query: "SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").intoJSON() else {
+                            guard let info = try? await client.user_query(query: "SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").intoJSON()[0]["result"][0] else {
                                 return
                             }
                             
-                            print(client.auth)
-                            print(res)
+                            print(client.auth as Any)
+                            print(info)
                             
-                            let info = res[0]["result"][0]
                             user.id = info["id"].stringValue
                             user.email = info["email"].stringValue
                             user.first_name = info["first_name"].stringValue
@@ -79,7 +78,7 @@ struct ContentView: View {
                 switch currentView {
                 case 1: WelcomeView(client: $client, user: $user)
                         .navigationTitle("Bienvenido, \(user.first_name.capitalized)".trimmingCharacters(in: [" ", ","]) + "!")
-                case 2: LibraryView()
+                case 2: LibraryView(client: $client, user: $user)
                         .navigationTitle("Library")
                 case 3: SearchView()
                         .navigationTitle("Search")

@@ -91,8 +91,12 @@ struct UserView: View {
             
             ScrollView {
                 VStack {
-                    ForEach(user.my_collections, id: \.self) { collection in
-                        CardView(collection: $user.my_collections[user.my_collections.firstIndex(of: collection)!] )
+                    ForEach(user.own_collections, id: \.self.id) { collection in
+                        CardView(
+                            collection: $user.own_collections[user.own_collections.firstIndex(of: collection)!],
+                            client: $client,
+                            user: $user
+                        )
                     }
                 }
             }
@@ -106,14 +110,15 @@ struct UserView: View {
                     return
                 }
                 
-                user.my_collections.removeAll()
+                user.own_collections.removeAll()
                 for col in res.arrayValue {
-                    user.my_collections.append(
+                    user.own_collections.append(
                         Collection(
                             id: col["id"].stringValue,
                             name: col["name"].stringValue,
                             author: user.id,
-                            description: col["description"].stringValue
+                            description: col["description"].stringValue,
+                            user_owned: true
                         )
                     )
                 }

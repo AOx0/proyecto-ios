@@ -44,7 +44,7 @@ DEFINE FIELD email ON TABLE user TYPE string
 
 -- Solo tu puedes ver el email de gravatar
 DEFINE FIELD gravatar ON TABLE user
-    VALUE $value OR ""
+    VALUE $value OR "No gravatar"
     PERMISSIONS
         FOR select WHERE id = $auth.id
 ;
@@ -64,6 +64,23 @@ DEFINE FIELD public_sus ON user TYPE bool VALUE $value OR false;
 
 -- Si este campo tiene valor true se borra el usuario y todo lo que creó.
 DEFINE FIELD erased ON user TYPE bool VALUE $value OR false;
+
+-- Endpoint para crear suscripciones del usuario
+DEFINE FIELD suscribe_to ON user TYPE record(collection) VALUE $value OR NULL;
+
+DEFINE EVENT suscribe_user_to_collection ON user WHEN $event = "UPDATE" AND $after.suscribe_to != NULL THEN {
+    LET $from = id;
+    LET $to = suscribe_to;
+    LET $times_suscribed_to_target = RETURN SELECT VALUE count(->(sus WHERE out = $to)) FROM type::thing(id);
+    LET $times_as_owner = RETURN SELECT VALUE count(->(owns WHERE out = $to)) FROM type::thing(id);
+    
+    IF ($from = $auth.id AND $times_suscribed_to_target[0] = 0 AND $times_as_owner[0] = 0) THEN
+        RELATE $from->sus->$to UNIQUE
+            SET sub_since = time::now()
+    END;
+
+    UPDATE type::thing(id) SET suscribe_to = NULL;
+};
 
 -- Evento que, cuando detecta que erased es true borra todos los articulos y al usuario.
 DEFINE EVENT delete_user_collections ON user WHEN $event = "UPDATE" AND $after.erased = true THEN {
