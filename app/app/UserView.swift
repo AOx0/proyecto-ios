@@ -103,10 +103,9 @@ struct UserView: View {
             
             Spacer()
         }
-        .padding()
         .onAppear() {
             Task{
-                guard let res = try? await client.user_query(query: "SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
+                guard let res = try? await client.exec("SELECT *, count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
                     return
                 }
                 
@@ -118,6 +117,9 @@ struct UserView: View {
                             name: col["name"].stringValue,
                             author: user.id,
                             description: col["description"].stringValue,
+                            pub: col["public"].boolValue,
+                            views: col["views"].uInt64Value,
+                            sus: col["sus"].uInt64Value,
                             user_owned: true
                         )
                     )

@@ -29,6 +29,9 @@ struct Collection: Equatable {
     var name: String
     var author: String
     var description: String
+    var pub: Bool
+    var views: UInt64
+    var sus: UInt64
     var user_owned = false
     var is_suscribed = false
     var cards: [Card] = [Card]()
@@ -78,7 +81,7 @@ struct WelcomeView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.user_query(query: "SELECT *, (<-owns<-user.id)[0] AS owner, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS sus FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").intoJSON()[0]["result"] else {
+                guard let res = try? await client.exec("SELECT *, (<-owns<-user.id)[0] AS owner, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus, count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").intoJSON()[0]["result"] else {
                     return
                 }
                 
@@ -90,7 +93,10 @@ struct WelcomeView: View {
                             name: col["name"].stringValue,
                             author: col["owner"].stringValue,
                             description: col["description"].stringValue,
-                            is_suscribed: col["sus"].boolValue
+                            pub: col["public"].boolValue,
+                            views: col["views"].uInt64Value,
+                            sus: col["sus"].uInt64Value,
+                            is_suscribed: col["is_sus"].boolValue
                         )
                     )
                 }

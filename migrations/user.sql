@@ -66,7 +66,35 @@ DEFINE FIELD public_sus ON user TYPE bool VALUE $value OR false;
 DEFINE FIELD erased ON user TYPE bool VALUE $value OR false;
 
 -- Endpoint para crear suscripciones del usuario
-DEFINE FIELD suscribe_to ON user TYPE record(collection) VALUE $value OR NULL;
+DEFINE FIELD suscribe_to ON user TYPE record(collection) VALUE $value OR NULL
+    PERMISSIONS
+        FOR select NONE
+;
+
+-- Endpoint para segur usuarios
+DEFINE FIELD follow_user ON user TYPE record(user) VALUE $value OR NULL
+    PERMISSIONS
+        FOR select NONE
+;
+
+-- Ednpoint para registrar visitas a colecciones
+DEFINE FIELD view_collection ON user TYPE record(collection) VALUE $value OR NULL
+    PERMISSIONS
+        FOR select NONE
+;
+
+DEFINE EVENT register_view ON user WHEN $event = "UPDATE" AND $after.view_collection != NULL THEN {
+    LET $from = id;
+    LET $to = view_collection;
+    LET $times_as_owner = RETURN SELECT VALUE count(->(owns WHERE out = $to)) FROM type::thing(id);
+    
+    IF ($from = $auth.id AND $times_as_owner[0] = 0) THEN
+        RELATE $from->view->$to
+            SET id = [time::now(), $to]
+    END;
+
+    UPDATE type::thing(id) SET view_collection = NULL;
+};
 
 DEFINE EVENT suscribe_user_to_collection ON user WHEN $event = "UPDATE" AND $after.suscribe_to != NULL THEN {
     LET $from = id;
@@ -76,10 +104,24 @@ DEFINE EVENT suscribe_user_to_collection ON user WHEN $event = "UPDATE" AND $aft
     
     IF ($from = $auth.id AND $times_suscribed_to_target[0] = 0 AND $times_as_owner[0] = 0) THEN
         RELATE $from->sus->$to UNIQUE
-            SET sub_since = time::now()
+            SET sub_since = time::now(),
+                id = [time::round(time::now(), 2h), $to, $from]
     END;
 
     UPDATE type::thing(id) SET suscribe_to = NULL;
+};
+
+DEFINE EVENT create_user_follow ON user WHEN $event = "UPDATE" AND $after.follow_user != NULL THEN {
+    LET $from = id;
+    LET $to = follow_user;
+    LET $already_follow_relations = RETURN SELECT VALUE count(->(follow WHERE out = $to)) FROM type::thing(id);
+    
+    IF ($from = $auth.id AND $already_follow_relations[0] = 0 AND $to != $from) THEN
+        RELATE $from->follow->$to UNIQUE
+            SET follow_since = time::now()
+    END;
+
+    UPDATE type::thing(id) SET follow_user = NULL;
 };
 
 -- Evento que, cuando detecta que erased es true borra todos los articulos y al usuario.

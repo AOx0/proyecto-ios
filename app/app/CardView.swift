@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftyJSON
 
 
 struct CardView: View {
@@ -16,60 +17,105 @@ struct CardView: View {
     @Binding var user: User
 
     var body: some View {
-        NavigationLink {
-            VStack {
-                Text(collection.description)
-                Spacer()
-            }
-            .padding()
-            .navigationTitle(Text(collection.name))
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if !collection.user_owned {
-                        Button(collection.is_suscribed  ? "Unsuscribe" : "Suscribe") {
-                            // Assume a successfull process to suscribe/unsuscribe
-                            collection.is_suscribed = !collection.is_suscribed
-                            
-                            // Actually suscribe/unsuscribe
-                            Task {
-                                // IMPORTANT: Here we inverse-check because we already toggled the value
-                                if !collection.is_suscribed {
-                                    let _ = try? await client.user_query(query: "DELETE FROM \(user.id)->sus WHERE out=\(collection.id);")
-                                } else {
-                                    let _ = try? await client.user_query(query: "UPDATE \(user.id) SET suscribe_to = \(collection.id)")
+        Group {
+            NavigationLink {
+                VStack {
+                    Text(collection.description)
+                    if collection.pub {
+                        HStack(spacing: 5.0) {
+                            Image(systemName: "eye.fill")
+                            Text("\(collection.views)")
+                        }
+                        .font(.caption2)
+                        
+                        HStack(spacing: 5.0) {
+                            Image(systemName: collection.is_suscribed ? "star.fill" : "star")
+                            Text("\(collection.sus)")
+                        }
+                        .font(.caption2)
+                    }
+                }
+                .padding()
+                .navigationTitle(Text(collection.name))
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        if !collection.user_owned {
+                            Button(collection.is_suscribed  ? "Unsuscribe" : "Suscribe") {
+                                // Assume a successfull process to suscribe/unsuscribe
+                                collection.is_suscribed = !collection.is_suscribed
+                                
+                                // Actually suscribe/unsuscribe
+                                Task {
+                                    // IMPORTANT: Here we inverse-check because we already toggled the value
+                                    if !collection.is_suscribed {
+                                        let _ = try? await client.exec("DELETE FROM \(user.id)->sus WHERE out=\(collection.id);")
+                                    } else {
+                                        let _ = try? await client.exec("UPDATE \(user.id) SET suscribe_to = \(collection.id)")
+                                    }
+                                    
+                                    guard let res = try? await client.exec("SELECT count(<-sus<-(user WHERE id = $auth.id)) = 1 AS sus FROM \(collection.id)").intoJSON()[0]["result"][0] else {
+                                        return
+                                    }
+                                    
+                                    // Update suscription status whith the actual data
+                                    collection.is_suscribed = res["sus"].boolValue
                                 }
                                 
-                                guard let res = try? await client.user_query(query: "SELECT count(<-sus<-(user WHERE id = $auth.id)) = 1 AS sus FROM \(collection.id)").intoJSON()[0]["result"][0] else {
-                                    return
-                                }
                                 
-                                // Update suscription status whith the actual data
-                                collection.is_suscribed = res["sus"].boolValue
                             }
-                            
-                            
                         }
                     }
                 }
-            }
-        } label: {
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading) {
-                    Text(collection.name)
-                        .font(.headline)
-                    Text("by \(collection.author.replacingOccurrences(of: "user:", with: ""))")
-                        .font(.footnote)
+                .onAppear() {
+                    Task {
+                        if collection.pub {
+                            let _ = try? await client.exec("UPDATE \(user.id) SET view_collection = \(collection.id)")
+                        }
+                        guard let views_res: JSON = try? await client.exec("RETURN SELECT VALUE count(<-view<-user.id) FROM \(collection.id)").intoJSON() else { return }
+                        collection.views = views_res[0]["result"].uInt64Value
+                    }
                 }
-                Spacer()
-                Text(collection.is_suscribed ? "Suscribed" : "")
-                    .font(.footnote)
+            } label: {
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading) {
+                        Text(collection.name)
+                            .font(.headline)
+                        Text("by \(collection.author.replacingOccurrences(of: "user:", with: ""))")
+                            .font(.footnote)
+                    }
+                    Spacer()
+                    
+                    if collection.pub {
+                        HStack(spacing: 5.0) {
+                            Image(systemName: "eye.fill")
+                            Text("\(collection.views)")
+                        }
+                        .font(.caption2)
+                        
+                        HStack(spacing: 5.0) {
+                            Image(systemName: (collection.is_suscribed || collection.user_owned) ? "star.fill" : "star")
+                            Text("\(collection.sus)")
+                        }
+                        .font(.caption2)
+                    }
+                }
+                .padding()
+                .background() {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.gray).opacity(0.1)
+                }
+                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
-            .padding()
-            .background() {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.gray).opacity(0.1)
-            }
-            .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         }
+        .onAppear() {
+            Task {
+                if collection.pub {
+                    guard let views_res: JSON = try? await client.exec("RETURN SELECT count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM \(collection.id)").intoJSON() else { return }
+                    collection.views = views_res[0]["result"]["views"].uInt64Value
+                    collection.sus = views_res[0]["result"]["sus"].uInt64Value
+                }
+            }
+        }
+
     }
 }

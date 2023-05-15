@@ -43,7 +43,7 @@ struct ContentView: View {
                 Button("Log In") {
                     Task {
                         if (try? await client.login(mail: email, pass: pass)) != nil {
-                            guard let info = try? await client.user_query(query: "SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").intoJSON()[0]["result"][0] else {
+                            guard let info = try? await client.exec("SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").intoJSON()[0]["result"][0] else {
                                 return
                             }
                             

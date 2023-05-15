@@ -38,7 +38,8 @@ DEFINE FIELD description ON collection TYPE string VALUE $value OR "No descripti
 DEFINE EVENT relate_autor_collection ON collection WHEN $event = "CREATE" THEN {
     LET $autor = $auth.id;
     LET $collection = $value.id;
-    RELATE $autor->owns->$collection;
+    RELATE $autor->owns->$collection
+        SET created_on = time::now()
 };
 
 COMMIT;

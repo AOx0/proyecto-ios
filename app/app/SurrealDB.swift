@@ -120,7 +120,7 @@ struct SurrealDBClient {
         return auth
     }
 
-    func user_query(query: String) async throws -> Data {
+    func exec(_ query: String) async throws -> Data {
         guard let auth = auth else {
             throw SurrealError.InvalidUrl
         }

@@ -12,4 +12,10 @@ DEFINE TABLE owns SCHEMAFULL
 DEFINE FIELD in ON owns TYPE record(user);
 DEFINE FIELD out ON owns TYPE record(collection);
 
+DEFINE FIELD created_on ON owns
+    PERMISSIONS
+        FOR select
+            WHERE in.id = $auth.id
+;
+
 COMMIT;

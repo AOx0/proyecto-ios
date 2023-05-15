@@ -52,11 +52,11 @@ struct LibraryView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.user_query(query: "SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
+                guard let res = try? await client.exec("SELECT *, count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
                     return
                 }
                 // SELECT * FROM collection WHERE <-sus<-(user WHERE id = user:daniel)
-                guard let sus = try? await client.user_query(query: "SELECT *, (<-owns.in)[0] as owner FROM collection WHERE <-sus<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
+                guard let sus = try? await client.exec("SELECT *, (<-owns.in)[0] as owner, count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM collection WHERE <-sus<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
                     return
                 }
                 
@@ -69,6 +69,9 @@ struct LibraryView: View {
                             name: col["name"].stringValue,
                             author: user.id,
                             description: col["description"].stringValue,
+                            pub: col["public"].boolValue,
+                            views: col["views"].uInt64Value,
+                            sus: col["sus"].uInt64Value,
                             user_owned: true
                         )
                     )
@@ -81,6 +84,9 @@ struct LibraryView: View {
                             name: col["name"].stringValue,
                             author: col["owner"].stringValue,
                             description: col["description"].stringValue,
+                            pub: col["public"].boolValue,
+                            views: col["views"].uInt64Value,
+                            sus: col["sus"].uInt64Value,
                             is_suscribed: true
                         )
                     )
