@@ -126,6 +126,8 @@ DEFINE EVENT create_user_follow ON user WHEN $event = "UPDATE" AND $after.follow
 
 -- Evento que, cuando detecta que erased es true borra todos los articulos y al usuario.
 DEFINE EVENT delete_user_collections ON user WHEN $event = "UPDATE" AND $after.erased = true THEN {
+    -- Las relaciones se borran solas, pero datos de tablas en si no. Hay que borrar las colecciones del usuario
+    -- a mano. No es necesario borrar las publicaciones con evento porque ya se esta corriendo en contexto de admin
     DELETE collection WHERE <-owns<-(user WHERE id = type::thing($before.id));
     DELETE type::thing($after.id);
 };

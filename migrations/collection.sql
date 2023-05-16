@@ -18,8 +18,10 @@ DEFINE TABLE collection SCHEMAFULL
                             WHERE <-owns<-(user WHERE id = $auth.id)
                     )) = 1
             )
-        FOR update, delete
-            WHERE id = $auth.id
+        FOR update
+            WHERE (count((SELECT * FROM type::thing(id) WHERE <-owns<-(user WHERE id = $auth.id))) = 1)
+        -- Solo se puede borrar por medio del campo erased
+        FOR delete NONE
         FOR create FULL
 ;
 
@@ -41,5 +43,18 @@ DEFINE EVENT relate_autor_collection ON collection WHEN $event = "CREATE" THEN {
     RELATE $autor->owns->$collection
         SET created_on = time::now()
 };
+
+-- POSTMORTEM DE POSTMORTEM
+-- Al borrar desde el evento si se borra en cascada porque en un ambiente de root si se tienen todos los permisos para borrar
+-- POSTMOTEM
+-- Evento que, cuando detecta que erased es true borra la coleccion y las relaciones de seguimiento
+-- Borrar un elemento automaticamente borra todas las relaciones donde actua como out. 
+--     Por eso no es necesario borrar a mano sus ni owns
+DEFINE EVENT delete_collection_on_erased ON collection WHEN $event = "UPDATE" AND $after.erased = true THEN {
+   DELETE type::thing($after.id);
+};
+-- Si este campo tiene valor true se borra la coleccion, la información de seguimiento
+DEFINE FIELD erased ON collection TYPE bool VALUE $value OR false;
+
 
 COMMIT;
