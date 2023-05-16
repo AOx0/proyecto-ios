@@ -88,9 +88,11 @@ DEFINE EVENT register_view ON user WHEN $event = "UPDATE" AND $after.view_collec
     LET $to = view_collection;
     LET $times_as_owner = RETURN SELECT VALUE count(->(owns WHERE out = $to)) FROM type::thing(id);
     
-    IF ($from = $auth.id AND $times_as_owner[0] = 0) THEN
+    IF ($from = $auth.id AND $times_as_owner[0] = 0) THEN {
+        UPDATE type::thing($to) SET num_views += 1;
         RELATE $from->view->$to
-            SET id = [time::now(), $to]
+            SET id = [time::now(), $to];
+    }
     END;
 
     UPDATE type::thing(id) SET view_collection = NULL;
@@ -102,10 +104,12 @@ DEFINE EVENT suscribe_user_to_collection ON user WHEN $event = "UPDATE" AND $aft
     LET $times_suscribed_to_target = RETURN SELECT VALUE count(->(sus WHERE out = $to)) FROM type::thing(id);
     LET $times_as_owner = RETURN SELECT VALUE count(->(owns WHERE out = $to)) FROM type::thing(id);
     
-    IF ($from = $auth.id AND $times_suscribed_to_target[0] = 0 AND $times_as_owner[0] = 0) THEN
+    IF ($from = $auth.id AND $times_suscribed_to_target[0] = 0 AND $times_as_owner[0] = 0) THEN {
+        UPDATE type::thing($to) SET num_sus += 1;
         RELATE $from->sus->$to UNIQUE
             SET sub_since = time::now(),
-                id = [time::round(time::now(), 2h), $to, $from]
+                id = [time::round(time::now(), 2h), $to, $from];
+    }
     END;
 
     UPDATE type::thing(id) SET suscribe_to = NULL;

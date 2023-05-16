@@ -36,6 +36,18 @@ DEFINE FIELD name ON collection TYPE string VALUE $value OR "";
 
 DEFINE FIELD description ON collection TYPE string VALUE $value OR "No description";
 
+DEFINE FIELD num_sus ON collection TYPE int VALUE $value OR 0 
+PERMISSIONS
+    FOR create, update, delete NONE
+    FOR select FULL
+;
+
+DEFINE FIELD num_views ON collection TYPE int VALUE $value OR 0 
+PERMISSIONS
+    FOR create, update, delete NONE
+    FOR select FULL
+;
+
 -- Register owner when a collection gets created
 DEFINE EVENT relate_autor_collection ON collection WHEN $event = "CREATE" THEN {
     LET $autor = $auth.id;
