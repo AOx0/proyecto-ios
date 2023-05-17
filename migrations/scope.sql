@@ -39,15 +39,15 @@ CREATE user:david
         email = "david@gmail.com",
         pass = crypto::argon2::generate("1234"),
         public_sus = true,
-        first_name="Hector",
-        last_name="Espinoza"
+        first_name="David",
+        last_name="Guti"
 ;
 
 CREATE user:agus
     SET
         email = "agus@gmail.com",
         pass = crypto::argon2::generate("1234"),
-        first_name="Agus",
+        first_name="Agustin",
         last_name="Lopez"
 ;
 

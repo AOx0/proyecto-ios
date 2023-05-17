@@ -19,7 +19,12 @@ DEFINE TABLE collection SCHEMAFULL
                     )) = 1
             )
         FOR update
-            WHERE (count((SELECT * FROM type::thing(id) WHERE <-owns<-(user WHERE id = $auth.id))) = 1)
+            WHERE (
+                count((
+                    SELECT * FROM type::thing(id)
+                        WHERE <-owns<-(user WHERE id = $auth.id)
+                )) = 1
+            )
         -- Solo se puede borrar por medio del campo erased
         FOR delete NONE
         FOR create FULL
@@ -39,13 +44,11 @@ DEFINE FIELD description ON collection TYPE string VALUE $value OR "No descripti
 DEFINE FIELD num_sus ON collection TYPE int VALUE $value OR 0 
 PERMISSIONS
     FOR create, update, delete NONE
-    FOR select FULL
 ;
 
 DEFINE FIELD num_views ON collection TYPE int VALUE $value OR 0 
 PERMISSIONS
     FOR create, update, delete NONE
-    FOR select FULL
 ;
 
 -- Register owner when a collection gets created
