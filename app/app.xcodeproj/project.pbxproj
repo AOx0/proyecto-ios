@@ -17,6 +17,7 @@
 		A91AC4372A04E08E004B7916 /* CreateCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91AC4362A04E08E004B7916 /* CreateCollection.swift */; };
 		A91FA01F2A06F11A007ECE37 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91FA01E2A06F11A007ECE37 /* UserView.swift */; };
 		A91FA0212A06F178007ECE37 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91FA0202A06F178007ECE37 /* SearchView.swift */; };
+		A94A507D2A179E2C0001B6A7 /* Semaphore in Frameworks */ = {isa = PBXBuildFile; productRef = A94A507C2A179E2C0001B6A7 /* Semaphore */; };
 		A9BB03032A06DB590093A6AC /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BB03022A06DB590093A6AC /* LibraryView.swift */; };
 		A9BCAE9F2A0AF63400DC3A0C /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BCAE9E2A0AF63400DC3A0C /* CardView.swift */; };
 /* End PBXBuildFile section */
@@ -42,6 +43,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A91AC4332A04BDC0004B7916 /* SwiftyJSON in Frameworks */,
+				A94A507D2A179E2C0001B6A7 /* Semaphore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,6 +110,7 @@
 			name = app;
 			packageProductDependencies = (
 				A91AC4322A04BDC0004B7916 /* SwiftyJSON */,
+				A94A507C2A179E2C0001B6A7 /* Semaphore */,
 			);
 			productName = app;
 			productReference = A91AC41E2A04BCB9004B7916 /* app.app */;
@@ -139,6 +142,7 @@
 			mainGroup = A91AC4152A04BCB9004B7916;
 			packageReferences = (
 				A91AC4312A04BDC0004B7916 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
+				A94A507B2A179E2C0001B6A7 /* XCRemoteSwiftPackageReference "Semaphore" */,
 			);
 			productRefGroup = A91AC41F2A04BCB9004B7916 /* Products */;
 			projectDirPath = "";
@@ -389,6 +393,14 @@
 				minimumVersion = 5.0.0;
 			};
 		};
+		A94A507B2A179E2C0001B6A7 /* XCRemoteSwiftPackageReference "Semaphore" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/Semaphore";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.8;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -396,6 +408,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A91AC4312A04BDC0004B7916 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
 			productName = SwiftyJSON;
+		};
+		A94A507C2A179E2C0001B6A7 /* Semaphore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A94A507B2A179E2C0001B6A7 /* XCRemoteSwiftPackageReference "Semaphore" */;
+			productName = Semaphore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

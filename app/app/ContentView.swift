@@ -12,7 +12,7 @@ struct ContentView: View {
     @State var user = User()
     @State var image: Image? = nil
     
-    @State var client = SurrealDBClient(url: "http://187.208.119.8:8000")
+    @State var client: Surreal = Surreal(address: "189.171.139.41:8000")
     
     @State var email = "daniel@gmail.com"
     @State var pass = "1234"
@@ -25,6 +25,14 @@ struct ContentView: View {
                 LoginView()
             } else {
                 AppView()
+            }
+        }
+        .onAppear() {
+            // Comenzar la conexión con el WebSocket
+            if case .Connecting = client.state {
+                Task {
+                    try! await client.start()
+                }
             }
         }
     }
@@ -42,14 +50,16 @@ struct ContentView: View {
             HStack {
                 Button("Log In") {
                     Task {
-                        if (try? await client.login(mail: email, pass: pass)) != nil {
-                            guard let info = try? await client.exec("SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").intoJSON()[0]["result"][0] else {
+                        
+                        
+                        if let token = try await client.login(mail: email, pass: pass) {
+                            let _ = try? await client.authenticate()
+                            guard let info = try? await client.query("SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").result[0]["result"][0] else {
                                 return
                             }
                             
                             print(client.auth as Any)
-                            print(info)
-                            
+
                             user.id = info["id"].stringValue
                             user.email = info["email"].stringValue
                             user.first_name = info["first_name"].stringValue

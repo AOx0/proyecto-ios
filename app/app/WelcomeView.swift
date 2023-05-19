@@ -60,7 +60,7 @@ struct NavButton: View {
 }
 
 struct WelcomeView: View {
-    @Binding var client: SurrealDBClient
+    @Binding var client: Surreal
     @Binding var user: User
     
     var body: some View {
@@ -81,10 +81,10 @@ struct WelcomeView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.exec("SELECT *, (<-owns<-user.id)[0] AS owner, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").intoJSON()[0]["result"] else {
+                guard let res = try? await client.query("SELECT *, (<-owns<-user.id)[0] AS owner, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").result[0]["result"] else {
                     return
                 }
-                
+
                 user.rec_collections.removeAll()
                 for col in res.arrayValue {
                     user.rec_collections.append(

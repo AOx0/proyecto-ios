@@ -24,7 +24,7 @@ struct Img {
 }
 
 struct UserView: View {
-    @Binding var client: SurrealDBClient
+    @Binding var client: Surreal
     
     @Binding var user: User
     @Binding var img: Image?
@@ -105,7 +105,7 @@ struct UserView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.exec("SELECT *, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").intoJSON()[0]["result"] else {
+                guard let res = try? await client.query("SELECT *, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").result[0]["result"] else {
                     return
                 }
                 
