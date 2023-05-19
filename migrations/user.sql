@@ -120,9 +120,12 @@ DEFINE EVENT create_user_follow ON user WHEN $event = "UPDATE" AND $after.follow
     LET $to = follow_user;
     LET $already_follow_relations = RETURN SELECT VALUE count(->(follow WHERE out = $to)) FROM type::thing(id);
     
-    IF ($from = $auth.id AND $already_follow_relations[0] = 0 AND $to != $from) THEN
-        RELATE $from->follow->$to UNIQUE
-            SET follow_since = time::now()
+    -- El trigger hace un toggle, es decir que si el usuario ya seguia a una persona hace que
+    -- la deje de seguir y viceversa
+    IF ($from = $auth.id AND $to != $from AND $already_follow_relations[0] = 1) THEN
+        ( DELETE FROM ($from->follow) WHERE out=$to )
+    ELSE IF ($from = $auth.id AND $to != $from AND $already_follow_relations[0] = 0) THEN
+        ( RELATE $from->follow->$to UNIQUE SET follow_since = time::now() )
     END;
 
     UPDATE type::thing(id) SET follow_user = NULL;
