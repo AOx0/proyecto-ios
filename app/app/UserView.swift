@@ -105,7 +105,7 @@ struct UserView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT *, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").result[0]["result"] else {
+                guard let res = try? await client.query("SELECT *, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
                     return
                 }
                 

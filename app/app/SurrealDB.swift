@@ -13,12 +13,6 @@ enum SurrealError: Error {
     case InvalidUrl, SessionError, Ok, No200Response(JSON, URLResponse)
 }
 
-struct Response {
-    let result: [[String: Any]]
-    let status: String
-    let time: String
-}
-
 protocol IntoJSON {
     func intoJSON() throws -> JSON
 }
@@ -26,22 +20,6 @@ protocol IntoJSON {
 extension Data: IntoJSON {
     func intoJSON() throws -> JSON {
         try! JSON(data: self)
-    }
-}
-
-protocol IntoResponse {
-    func fetchAll() throws -> [Response]
-    func fetchOne() throws -> Response?
-}
-
-extension Data: IntoResponse {
-    func fetchAll() throws -> [Response] {
-        let json = try! JSONSerialization.jsonObject(with: self, options: []) as! [[String: Any]]
-        return json.map({ Response(result: $0["result"] as! [[String: Any]], status: $0["status"] as! String, time: $0["time"] as! String)})
-    }
-
-    func fetchOne() throws -> Response? {
-        try self.fetchAll().first
     }
 }
 
@@ -76,15 +54,15 @@ struct Surreal {
         state = SurrealState.Disconnected
     }
     
-    public mutating func query(_ sql: String) async throws -> SResponse {
+    public mutating func query(_ sql: String) async throws -> Response {
         return try await _send_recv(req: Request(id: UUID().uuidString.lowercased(), method: "query", params: try! JSONEncoder().encode([sql]).intoJSON()))
     }
 
-    public mutating func invalidate() async throws -> SResponse {
+    public mutating func invalidate() async throws -> Response {
         return try await _send_recv(req: Request(id: UUID().uuidString.lowercased(), method: "invalidate", params: JSON()))
     }
 
-    public mutating func use(namespace: String, database: String) async throws -> SResponse {
+    public mutating func use(namespace: String, database: String) async throws -> Response {
         return try await _send_recv(req: Request(id: UUID().uuidString.lowercased(), method: "use", params: try! JSONEncoder().encode([namespace, database]).intoJSON()))
     }
 
@@ -156,19 +134,7 @@ struct Surreal {
         return auth
     }
 
-    public mutating func signup(vars: [String: String]) async throws -> String {
-        let res = try await _send_recv(req: Request(id: UUID().uuidString.lowercased(), method: "signup", params: try! JSONEncoder().encode([vars]).intoJSON()))
-        auth = res.result["token"].string
-        return auth!
-    }
-
-    public mutating func signin(vars: [String: String]) async throws -> String {
-        let res = try await _send_recv(req: Request(id: UUID().uuidString.lowercased(), method: "signin", params: try! JSONEncoder().encode([vars]).intoJSON()))
-        auth = res.result["token"].string
-        return auth!
-    }
-
-    public mutating func authenticate() async throws -> SResponse {
+    public mutating func authenticate() async throws -> Response {
         guard let auth = auth else {
             throw SurrealError.SessionError
         }
@@ -185,7 +151,7 @@ struct Surreal {
         try await connection.send(.string(req_str))
     }
 
-    public mutating func _recv(for_id: String) async throws -> SResponse {
+    public mutating func _recv(for_id: String) async throws -> Response {
         guard let connection = connection else {
             throw SurrealError.SessionError
         }
@@ -194,14 +160,14 @@ struct Surreal {
         // See https://github.com/surrealdb/surrealdb.py/blob/main/surrealdb/ws.py#LL709C1-LL710C1
         let res = try await connection.receive()
         switch res {
-                case .string(let str):
-                    return try JSONDecoder().decode(SResponse.self, from: str.data(using: String.Encoding.utf8)!)
-                default:
-                    throw SurrealError.SessionError
+            case .string(let str):
+                return try JSONDecoder().decode(Response.self, from: str.data(using: String.Encoding.utf8)!)
+            default:
+                throw SurrealError.SessionError
         }
     }
 
-    public mutating func _send_recv(req: Request) async throws -> SResponse {
+    public mutating func _send_recv(req: Request) async throws -> Response {
         await semaphore.wait()
             try await _send(req: req)
             let res = try await _recv(for_id: req.id)
@@ -219,20 +185,15 @@ struct Request: Codable {
     var method: String
     var params: JSON
 
-    func params_str(id: String, method: String, params: String) -> Request {
-        Request(id: id, method: method, params: try! JSON(data: params.data(using: String.Encoding.utf8)!))
-    }
-
-    func new(id: String, method: String, params: Codable) -> Request {
-        Request(id: id, method: method, params: try! JSONEncoder().encode(params).intoJSON())
-    }
-
     func into_string() -> String {
         try! JSONEncoder().encode(self).intoJSON().description
     }
 }
 
-struct SResponse: Codable {
+struct Response: Codable {
     var id: String
     var result: JSON
+    var json: JSON {
+        result[0]["result"]
+    }
 }

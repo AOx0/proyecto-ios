@@ -54,7 +54,7 @@ struct ContentView: View {
                         
                         if let token = try await client.login(mail: email, pass: pass) {
                             let _ = try? await client.authenticate()
-                            guard let info = try? await client.query("SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").result[0]["result"][0] else {
+                            guard let info = try? await client.query("SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").json[0] else {
                                 return
                             }
                             

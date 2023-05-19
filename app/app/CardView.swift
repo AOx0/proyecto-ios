@@ -53,7 +53,7 @@ struct CardView: View {
                                         let _ = try? await client.query("UPDATE \(user.id) SET suscribe_to = \(collection.id)")
                                     }
                                     
-                                    guard let res = try? await client.query("SELECT count(<-sus<-(user WHERE id = $auth.id)) = 1 AS sus FROM \(collection.id)").result[0]["result"][0] else {
+                                    guard let res = try? await client.query("SELECT count(<-sus<-(user WHERE id = $auth.id)) = 1 AS sus FROM \(collection.id)").json[0] else {
                                         return
                                     }
                                     
@@ -71,8 +71,8 @@ struct CardView: View {
                         if collection.pub {
                             let _ = try? await client.query("UPDATE \(user.id) SET view_collection = \(collection.id)")
                         }
-                        guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE count(<-view<-user.id) FROM \(collection.id)").result else { return }
-                        collection.views = views_res[0]["result"].uInt64Value
+                        guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE count(<-view<-user.id) FROM \(collection.id)").json else { return }
+                        collection.views = views_res.uInt64Value
                     }
                 }
             } label: {
@@ -110,9 +110,9 @@ struct CardView: View {
         .onAppear() {
             Task {
                 if collection.pub {
-                    guard let views_res: JSON = try? await client.query("RETURN SELECT count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM \(collection.id)").result else { return }
-                    collection.views = views_res[0]["result"]["views"].uInt64Value
-                    collection.sus = views_res[0]["result"]["sus"].uInt64Value
+                    guard let views_res: JSON = try? await client.query("RETURN SELECT count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM \(collection.id)").json else { return }
+                    collection.views = views_res["views"].uInt64Value
+                    collection.sus = views_res["sus"].uInt64Value
                 }
             }
         }
