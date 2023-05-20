@@ -93,15 +93,6 @@ struct ContentView: View {
                         .navigationTitle("Search")
                 case 4: UserView(client: $client, user: $user)
                         .navigationTitle("Account")
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarTrailing) {
-                                Button("Log out") {
-                                    // Borrar toda la información del usuario del estado
-                                    client.reset_auth()
-                                    user.reset()
-                                }
-                            }
-                        }
                 default: WelcomeView(client: $client, user: $user)
                 }
                 Spacer()

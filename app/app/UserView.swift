@@ -218,6 +218,15 @@ struct UserView: View {
             
             Spacer()
         }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Log out") {
+                    // Borrar toda la información del usuario del estado
+                    client.reset_auth()
+                    user.reset()
+                }
+            }
+        }
         .onAppear() {
             Task{
                 guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
