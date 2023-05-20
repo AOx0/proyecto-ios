@@ -25,6 +25,7 @@ struct LibraryView: View {
                         CardView(
                             collection: $user.sus_collections[user.sus_collections.firstIndex(of: collection)!],
                             client: $client,
+                            other_user: $user,
                             user: $user
                         )
                     }
@@ -43,6 +44,7 @@ struct LibraryView: View {
                         CardView(
                             collection: $user.own_collections[user.own_collections.firstIndex(of: collection)!],
                             client: $client,
+                            other_user: $user,
                             user: $user
                         )
                     }

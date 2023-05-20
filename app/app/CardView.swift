@@ -14,6 +14,7 @@ struct CardView: View {
     
     @Binding var collection: Collection
     @Binding var client: Surreal
+    @Binding var other_user: User
     @Binding var user: User
 
     var body: some View {
@@ -80,8 +81,19 @@ struct CardView: View {
                     VStack(alignment: .leading) {
                         Text(collection.name)
                             .font(.headline)
-                        Text("by \(collection.author.replacingOccurrences(of: "user:", with: ""))")
-                            .font(.footnote)
+                        
+                        NavigationLink {
+                            if user.id == collection.author {
+                                UserView(client: $client, user: $user)
+                                    .padding()
+                            } else {
+                                OtherUserView(client: $client, id: collection.author, user: $user)
+                                    .padding()
+                            }
+                        } label: {
+                            Text("by \(collection.author.replacingOccurrences(of: "user:", with: ""))")
+                                .font(.footnote)
+                        }
                     }
                     Spacer()
                     
@@ -116,6 +128,5 @@ struct CardView: View {
                 }
             }
         }
-
     }
 }

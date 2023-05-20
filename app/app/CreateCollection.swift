@@ -27,29 +27,6 @@ struct CreateCollection: View {
                         TextField("My collection", text: $collectionName)
                     }.frame(width: geo.size.width)
                     
-                    /*
-                    VStack(alignment: .leading) {
-                        Text("Collection Type")
-                            .font(.headline)
-                        
-                        
-                        Picker("Collection Type", selection: $collectionType) {
-                            Text("Memory Cards").tag(0)
-                            Text("Questions").tag(1)
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                         
-                    
-                        Text("Note: Collection type cannot be changed later.")
-                            .font(.footnote)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(10)
-                    }
-                    .frame(width: geo.size.width)
-                     */
-                    
                     VStack(alignment: .leading) {
                         Toggle("Public Collection", isOn: $isPublic)
                             .font(.headline)

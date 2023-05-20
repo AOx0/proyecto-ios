@@ -14,6 +14,7 @@ struct User {
     var email: String = ""
     var gravatar: String = ""
     var gravatar_md5: String = ""
+    var following: Bool = false
     
     var own_collections = [Collection]()
     var sus_collections = [Collection]()
@@ -71,6 +72,7 @@ struct WelcomeView: View {
                         CardView(
                             collection: $user.rec_collections[user.rec_collections.firstIndex(of: collection)!],
                             client: $client,
+                            other_user: $user,
                             user: $user
                         )
                     }

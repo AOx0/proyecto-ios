@@ -10,7 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @State var user = User()
-    @State var image: Image? = nil
     
     @State var client: Surreal = Surreal(address: "189.171.139.41:8000")
     
@@ -52,7 +51,7 @@ struct ContentView: View {
                     Task {
                         
                         
-                        if let token = try await client.login(mail: email, pass: pass) {
+                        if (try await client.login(mail: email, pass: pass)) != nil {
                             let _ = try? await client.authenticate()
                             guard let info = try? await client.query("SELECT email, first_name, last_name, gravatar, gravatar_md5, id FROM $auth.id").json[0] else {
                                 return
@@ -92,7 +91,7 @@ struct ContentView: View {
                         .navigationTitle("Library")
                 case 3: SearchView()
                         .navigationTitle("Search")
-                case 4: UserView(client: $client, user: $user, img: $image)
+                case 4: UserView(client: $client, user: $user)
                         .navigationTitle("Account")
                         .toolbar {
                             ToolbarItem(placement: .navigationBarTrailing) {
@@ -100,7 +99,6 @@ struct ContentView: View {
                                     // Borrar toda la información del usuario del estado
                                     client.reset_auth()
                                     user.reset()
-                                    image = nil
                                 }
                             }
                         }
