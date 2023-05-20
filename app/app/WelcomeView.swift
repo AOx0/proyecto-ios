@@ -83,7 +83,7 @@ struct WelcomeView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT *, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
+                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
                     return
                 }
 

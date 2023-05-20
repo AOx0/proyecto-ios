@@ -67,6 +67,14 @@ root: root
 file,view.sql;
 HTTP 200
 
+POST http://localhost:8000/sql
+Accept: application/json
+NS: proyecto_ios
+DB: proyecto
+[BasicAuth]
+root: root
+file,card.sql;
+HTTP 200
 
 ##########################
 # Actions as user:david

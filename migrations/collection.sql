@@ -11,9 +11,7 @@ DELETE collection;
 DEFINE TABLE collection SCHEMAFULL
     PERMISSIONS
         FOR select
-            WHERE ( 
-                public = true OR author = $auth.id
-            )
+            WHERE public = true OR author = $auth.id
         FOR update
             WHERE author = $auth.id
         -- Solo se puede borrar por medio del campo erased
@@ -26,8 +24,13 @@ DEFINE FIELD id ON collection PERMISSIONS
     FOR select FULL
 ;
 
-DEFINE FIELD author ON collection TYPE record(user);
+DEFINE FIELD is_sus ON collection 
+    VALUE <future> { 
+        RETURN (SELECT VALUE count(<-sus<-(user WHERE id = $auth.id)) = 1 FROM type::thing(id))[0];
+    }
+;
 
+DEFINE FIELD author ON collection TYPE record(user);
 
 DEFINE FIELD public ON collection TYPE bool VALUE $value OR false;
 

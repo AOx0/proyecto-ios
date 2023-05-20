@@ -69,9 +69,9 @@ struct OtherUserView: View {
                         let _ = try! await client.query("UPDATE type::thing($auth.id) SET follow_user = \(id)")
                         
                         // Update suscription status whith the actual data
-                        let res = try! await client.query("RETURN SELECT count(<-follow<-(user WHERE id = $auth.id)) = 1 AS is_following FROM \(other_user.id)").json
+                        let res = try! await client.query("RETURN fn::is_following( \(other_user.id))").json
 
-                        other_user.following = res["is_following"].boolValue
+                        other_user.following = res.boolValue
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -102,7 +102,7 @@ struct OtherUserView: View {
         }
         .onAppear() {
             Task{
-                guard let info = try? await client.query("RETURN SELECT *, count(<-follow<-(user WHERE id = $auth.id)) = 1 AS is_following FROM \(id)").json else {
+                guard let info = try? await client.query("RETURN SELECT *, fn::is_following(id) FROM \(id)").json else {
                     return
                 }
 
@@ -110,7 +110,7 @@ struct OtherUserView: View {
                 other_user.first_name = info["first_name"].stringValue
                 other_user.last_name = info["last_name"].stringValue
                 other_user.gravatar_md5 = info["gravatar_md5"].stringValue
-                other_user.following = info["is_following"].boolValue
+                other_user.following = info["fn::is_following"].boolValue
                 
                 // Cargar colecciones
                 guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = \(id))").json else {

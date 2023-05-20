@@ -49,7 +49,7 @@ struct CardView: View {
                                 Task {
                                     // IMPORTANT: Here we inverse-check because we already toggled the value
                                     let _ = try? await client.query("UPDATE type::thing($auth.id) SET suscribe_to = \(collection.id)")
-                                    guard let res = try? await client.query("RETURN SELECT count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus, num_sus FROM \(collection.id)").json else {
+                                    guard let res = try? await client.query("RETURN SELECT is_sus, num_sus FROM \(collection.id)").json else {
                                         return
                                     }
                                     
@@ -82,9 +82,11 @@ struct CardView: View {
                             if user.id == collection.author {
                                 UserView(client: $client, user: $user)
                                     .padding()
+                                    .navigationTitle("Account")
                             } else {
                                 OtherUserView(client: $client, id: collection.author, user: $user)
                                     .padding()
+                                    .navigationTitle("u/\(collection.author.replacingOccurrences(of: "user:", with: ""))")
                             }
                         } label: {
                             Text("by \(collection.author.replacingOccurrences(of: "user:", with: ""))")
