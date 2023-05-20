@@ -36,12 +36,33 @@ struct Collection: Equatable {
     var user_owned = false
     var is_suscribed = false
     var cards: [Card] = [Card]()
+    
+    mutating func load_cards(client: inout Surreal) async -> Bool {
+        guard let response = try? await client.query("SELECT VALUE out.* FROM \(id)->stack").json else {
+            return false
+        }
+        
+        cards.removeAll()
+        for card_info in response.arrayValue {
+            cards.append(Card(
+                id: card_info["id"].stringValue,
+                collection_id: card_info["collection"].stringValue,
+                back: card_info["back"].stringValue,
+                front: card_info["front"].stringValue
+            ))
+        }
+        
+        print(cards)
+        
+        return true
+    }
 }
 
 struct Card: Equatable {
     var id: String
-    var sentence: String
-    var answer: String
+    var collection_id: String
+    var back: String
+    var front: String
 }
 
 struct NavButton: View {

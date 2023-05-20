@@ -48,6 +48,37 @@ PERMISSIONS
     FOR create, update, delete NONE
 ;
 
+-- Endpoint para agregar cartas al stack
+DEFINE FIELD add_card ON collection TYPE object VALUE $value OR NULL;
+DEFINE FIELD add_card.front ON collection TYPE string;
+DEFINE FIELD add_card.back ON collection TYPE string;
+
+-- Cuando se crea una carta se agrega al stack
+-- Esperamos un objecto de la forma:
+/*
+{
+    front: String,
+    back: String,
+}
+*/
+-- Usamos top y bottom para crear un nuevo registo en la tabla card
+DEFINE EVENT add_card_to_stack ON collection WHEN $event = "UPDATE" AND $after.add_card != NULL THEN {
+    IF add_card.front != NULL AND add_card.back != NULL THEN {
+        LET $collection = id;
+        LET $front = add_card.front;
+        LET $back = add_card.back;
+
+        LET $card = (CREATE card SET
+            front = $front,
+            back = $back,
+            collection = $collection
+        );
+        RELATE $collection->stack->$card;
+        UPDATE type::thing($collection) SET add_card = NULL;
+    }
+    END;
+};
+
 -- Register owner when a collection gets created
 DEFINE EVENT relate_autor_collection ON collection WHEN $event = "CREATE" THEN {
     LET $autor = $auth.id;

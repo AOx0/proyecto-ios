@@ -67,6 +67,7 @@ root: root
 file,view.sql;
 HTTP 200
 
+
 POST http://localhost:8000/sql
 Accept: application/json
 NS: proyecto_ios
@@ -75,6 +76,17 @@ DB: proyecto
 root: root
 file,card.sql;
 HTTP 200
+
+
+POST http://localhost:8000/sql
+Accept: application/json
+NS: proyecto_ios
+DB: proyecto
+[BasicAuth]
+root: root
+file,stack.sql;
+HTTP 200
+
 
 ##########################
 # Actions as user:david
@@ -135,10 +147,60 @@ Accept: application/json
 NS: proyecto_ios
 DB: proyecto
 ```
-CREATE collection
+CREATE collection:col1
 	SET name= "Weird Words",
 		public = true
 ;
+
+UPDATE collection:col1 SET add_card = {
+	front: "ethos",
+	back: "espiritu"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "pathos",
+	back: "sentimiento"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "logos",
+	back: "razon"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "kairos",
+	back: "tiempo"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "nomos",
+	back: "ley"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "physis",
+	back: "naturaleza"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "telos",
+	back: "fin o meta"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "aletheia",
+	back: "verdad"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "doxa",
+	back: "opinion"
+};
+
+UPDATE collection:col1 SET add_card = {
+	front: "episteme",
+	back: "conocimiento"
+};
 
 CREATE collection
 	SET name= "WWII"

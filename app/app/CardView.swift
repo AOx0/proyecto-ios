@@ -21,20 +21,33 @@ struct CardView: View {
         Group {
             NavigationLink {
                 VStack {
-                    Text(collection.description)
                     if collection.pub {
-                        HStack(spacing: 5.0) {
-                            Image(systemName: "eye.fill")
-                            Text("\(collection.views)")
+                        HStack {
+                            Spacer()
+                            
+                            HStack(spacing: 5.0) {
+                                Image(systemName: "eye.fill")
+                                Text("\(collection.views)")
+                            }
+                            .font(.caption2)
+                            
+                            HStack(spacing: 5.0) {
+                                Image(systemName: collection.is_suscribed ? "star.fill" : "star")
+                                Text("\(collection.sus)")
+                            }
+                            .font(.caption2)
                         }
-                        .font(.caption2)
-                        
-                        HStack(spacing: 5.0) {
-                            Image(systemName: collection.is_suscribed ? "star.fill" : "star")
-                            Text("\(collection.sus)")
-                        }
-                        .font(.caption2)
                     }
+                    
+                    Text(collection.description)
+                    
+                    Divider()
+                    
+                    ForEach(collection.cards, id: \.self.id) { card in
+                        Text(card.id)
+                    }
+                    
+                    Spacer()
                 }
                 .padding()
                 .navigationTitle(Text(collection.name))
@@ -69,6 +82,9 @@ struct CardView: View {
                             let _ = try? await client.query("UPDATE \(user.id) SET view_collection = \(collection.id)")
                         }
                         guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE num_views FROM \(collection.id)").json else { return }
+                        
+                        await collection.load_cards(client: &client)
+                        
                         collection.views = views_res.uInt64Value
                     }
                 }
