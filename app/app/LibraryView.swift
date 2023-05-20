@@ -76,7 +76,8 @@ struct LibraryView: View {
                             pub: col["public"].boolValue,
                             views: col["num_views"].uInt64Value,
                             sus: col["num_sus"].uInt64Value,
-                            user_owned: true
+                            user_owned: true,
+                            is_suscribed: false
                         )
                     )
                 }

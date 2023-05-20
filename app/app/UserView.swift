@@ -128,7 +128,8 @@ struct OtherUserView: View {
                             pub: col["public"].boolValue,
                             views: col["num_views"].uInt64Value,
                             sus: col["num_sus"].uInt64Value,
-                            user_owned: false
+                            user_owned: false,
+                            is_suscribed: col["is_sus"].boolValue
                         )
                     )
                 }
