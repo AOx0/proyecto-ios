@@ -83,7 +83,7 @@ struct WelcomeView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT *, (<-owns<-user.id)[0] AS owner, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
+                guard let res = try? await client.query("SELECT *, count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
                     return
                 }
 
@@ -93,11 +93,11 @@ struct WelcomeView: View {
                         Collection(
                             id: col["id"].stringValue,
                             name: col["name"].stringValue,
-                            author: col["owner"].stringValue,
+                            author: col["author"].stringValue,
                             description: col["description"].stringValue,
                             pub: col["public"].boolValue,
-                            views: col["views"].uInt64Value,
-                            sus: col["sus"].uInt64Value,
+                            views: col["num_views"].uInt64Value,
+                            sus: col["num_sus"].uInt64Value,
                             is_suscribed: col["is_sus"].boolValue
                         )
                     )

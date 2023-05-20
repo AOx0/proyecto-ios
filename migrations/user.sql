@@ -110,6 +110,10 @@ DEFINE EVENT suscribe_user_to_collection ON user WHEN $event = "UPDATE" AND $aft
             SET sub_since = time::now(),
                 id = [time::round(time::now(), 2h), $to, $from];
     }
+    ELSE IF ($from = $auth.id AND $times_suscribed_to_target[0] != 0 AND $times_as_owner[0] = 0) THEN {
+        UPDATE type::thing($to) SET num_sus -= 1;
+        DELETE FROM ($from->sus) WHERE out= $to;
+    }
     END;
 
     UPDATE type::thing(id) SET suscribe_to = NULL;

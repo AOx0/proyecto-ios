@@ -63,15 +63,15 @@ struct OtherUserView: View {
             
             HStack {
                 Spacer()
-                Button(other_user.following ? "Follow" : "Unfollow") {
+                Button(other_user.following ? "Unfollow" : "Follow") {
                     other_user.following = !other_user.following
                     Task {
                         let _ = try! await client.query("UPDATE type::thing($auth.id) SET follow_user = \(id)")
                         
                         // Update suscription status whith the actual data
-                        let res = try! await client.query("RETURN SELECT count(<-follow<-(user WHERE id = $auth.id)) = 1 AS followed FROM \(other_user.id)").json
+                        let res = try! await client.query("RETURN SELECT count(<-follow<-(user WHERE id = $auth.id)) = 1 AS is_following FROM \(other_user.id)").json
 
-                        other_user.following = res["followed"].boolValue
+                        other_user.following = res["is_following"].boolValue
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -102,7 +102,7 @@ struct OtherUserView: View {
         }
         .onAppear() {
             Task{
-                guard let info = try? await client.query("SELECT email, first_name, last_name, gravatar, gravatar_md5, id, count(<-follow<-(user WHERE id = $auth.id)) = 1 AS followed FROM \(id)").json[0] else {
+                guard let info = try? await client.query("RETURN SELECT *, count(<-follow<-(user WHERE id = $auth.id)) = 1 AS is_following FROM \(id)").json else {
                     return
                 }
 
@@ -110,10 +110,10 @@ struct OtherUserView: View {
                 other_user.first_name = info["first_name"].stringValue
                 other_user.last_name = info["last_name"].stringValue
                 other_user.gravatar_md5 = info["gravatar_md5"].stringValue
-                other_user.following = info["followed"].boolValue
+                other_user.following = info["is_following"].boolValue
                 
                 // Cargar colecciones
-                guard let res = try? await client.query("SELECT *, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id = \(id))").json else {
+                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = \(id))").json else {
                     return
                 }
                 
@@ -126,8 +126,8 @@ struct OtherUserView: View {
                             author: other_user.id,
                             description: col["description"].stringValue,
                             pub: col["public"].boolValue,
-                            views: col["views"].uInt64Value,
-                            sus: col["sus"].uInt64Value,
+                            views: col["num_views"].uInt64Value,
+                            sus: col["num_sus"].uInt64Value,
                             user_owned: false
                         )
                     )
@@ -219,7 +219,7 @@ struct UserView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT *, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
+                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
                     return
                 }
                 
@@ -232,8 +232,8 @@ struct UserView: View {
                             author: user.id,
                             description: col["description"].stringValue,
                             pub: col["public"].boolValue,
-                            views: col["views"].uInt64Value,
-                            sus: col["sus"].uInt64Value,
+                            views: col["num_views"].uInt64Value,
+                            sus: col["num_sus"].uInt64Value,
                             user_owned: true
                         )
                     )

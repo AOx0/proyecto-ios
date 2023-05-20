@@ -54,11 +54,13 @@ struct LibraryView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT *, num_sus as sus, num_views as views FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
+                // Obtener todas las colecciones de las que somos dueños
+                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
                     return
                 }
-                // SELECT * FROM collection WHERE <-sus<-(user WHERE id = user:daniel)
-                guard let sus = try? await client.query("SELECT *, (<-owns.in)[0] as owner, num_sus as sus, num_views as views FROM collection WHERE <-sus<-(user WHERE id = $auth.id)").json else {
+
+                // Obtener todas las colecciones a las que estamos suscritos
+                guard let sus = try? await client.query("SELECT * FROM collection WHERE <-sus<-(user WHERE id = $auth.id)").json else {
                     return
                 }
                 
@@ -72,8 +74,8 @@ struct LibraryView: View {
                             author: user.id,
                             description: col["description"].stringValue,
                             pub: col["public"].boolValue,
-                            views: col["views"].uInt64Value,
-                            sus: col["sus"].uInt64Value,
+                            views: col["num_views"].uInt64Value,
+                            sus: col["num_sus"].uInt64Value,
                             user_owned: true
                         )
                     )
@@ -84,11 +86,11 @@ struct LibraryView: View {
                         Collection(
                             id: col["id"].stringValue,
                             name: col["name"].stringValue,
-                            author: col["owner"].stringValue,
+                            author: col["author"].stringValue,
                             description: col["description"].stringValue,
                             pub: col["public"].boolValue,
-                            views: col["views"].uInt64Value,
-                            sus: col["sus"].uInt64Value,
+                            views: col["num_views"].uInt64Value,
+                            sus: col["num_sus"].uInt64Value,
                             is_suscribed: true
                         )
                     )

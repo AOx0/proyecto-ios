@@ -48,18 +48,13 @@ struct CardView: View {
                                 // Actually suscribe/unsuscribe
                                 Task {
                                     // IMPORTANT: Here we inverse-check because we already toggled the value
-                                    if !collection.is_suscribed {
-                                        let _ = try? await client.query("DELETE FROM \(user.id)->sus WHERE out=\(collection.id);")
-                                    } else {
-                                        let _ = try? await client.query("UPDATE \(user.id) SET suscribe_to = \(collection.id)")
-                                    }
-                                    
-                                    guard let res = try? await client.query("SELECT count(<-sus<-(user WHERE id = $auth.id)) = 1 AS sus FROM \(collection.id)").json[0] else {
+                                    let _ = try? await client.query("UPDATE type::thing($auth.id) SET suscribe_to = \(collection.id)")
+                                    guard let res = try? await client.query("RETURN SELECT count(<-sus<-(user WHERE id = $auth.id)) = 1 AS is_sus FROM \(collection.id)").json else {
                                         return
                                     }
                                     
                                     // Update suscription status whith the actual data
-                                    collection.is_suscribed = res["sus"].boolValue
+                                    collection.is_suscribed = res["is_sus"].boolValue
                                 }
                                 
                                 
@@ -72,7 +67,7 @@ struct CardView: View {
                         if collection.pub {
                             let _ = try? await client.query("UPDATE \(user.id) SET view_collection = \(collection.id)")
                         }
-                        guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE count(<-view<-user.id) FROM \(collection.id)").json else { return }
+                        guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE num_views FROM \(collection.id)").json else { return }
                         collection.views = views_res.uInt64Value
                     }
                 }
@@ -122,9 +117,9 @@ struct CardView: View {
         .onAppear() {
             Task {
                 if collection.pub {
-                    guard let views_res: JSON = try? await client.query("RETURN SELECT count(<-sus<-user.id) as sus, count(<-view<-user.id) as views FROM \(collection.id)").json else { return }
-                    collection.views = views_res["views"].uInt64Value
-                    collection.sus = views_res["sus"].uInt64Value
+                    guard let views_res: JSON = try? await client.query("RETURN SELECT num_sus, num_views FROM \(collection.id)").json else { return }
+                    collection.views = views_res["num_views"].uInt64Value
+                    collection.sus = views_res["num_sus"].uInt64Value
                 }
             }
         }

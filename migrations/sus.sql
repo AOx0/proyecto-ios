@@ -20,12 +20,4 @@ DEFINE FIELD sub_since ON sus
             WHERE in.id = $auth.id
 ;
 
--- Cuando una relacion de seguimiento se elimina se resta en uno el contador de
--- seguidores
-DEFINE EVENT decrement_collection_sus_counter ON sus WHEN $event = "DELETE" THEN {
-  LET $col = $before.out;
-    CREATE log SET col = $col;
-    UPDATE $col SET num_sus -= 1;  
-};
-
 COMMIT;
