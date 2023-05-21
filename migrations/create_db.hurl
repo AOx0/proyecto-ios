@@ -88,6 +88,26 @@ file,stack.sql;
 HTTP 200
 
 
+POST http://localhost:8000/sql
+Accept: application/json
+NS: proyecto_ios
+DB: proyecto
+[BasicAuth]
+root: root
+file,tag.sql;
+HTTP 200
+
+
+POST http://localhost:8000/sql
+Accept: application/json
+NS: proyecto_ios
+DB: proyecto
+[BasicAuth]
+root: root
+file,tagged.sql;
+HTTP 200
+
+
 ##########################
 # Actions as user:david
 ##########################

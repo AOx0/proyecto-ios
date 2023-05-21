@@ -53,6 +53,46 @@ DEFINE FIELD add_card ON collection TYPE object VALUE $value OR NULL;
 DEFINE FIELD add_card.front ON collection TYPE string;
 DEFINE FIELD add_card.back ON collection TYPE string;
 
+-- Endpoint para agregar tags
+DEFINE FIELD add_tag ON collection TYPE string VALUE $value OR NULL;
+DEFINE FIELD num_tags ON collection TYPE int VALUE $value OR 0;
+
+-- Cuando se asigna a add_tag se crea la relacion con el tag si el numero de tags es menor a 5
+DEFINE EVENT add_tag_to_collection ON collection WHEN (
+    $event = "UPDATE" AND $after.add_tag != NULL AND $after.add_tag != $before.add_tag
+) THEN {
+    LET $from = id;
+    LET $tag_name = string::replace(add_tag, " ", "");
+    LET $to = (type::thing("tag", $tag_name));
+
+    IF num_tags > 5 OR is::alphanum($tag_name) = false OR string::len($tag_name) > 25 THEN {
+        RETURN;
+    }
+    END;
+
+    LET $times_added = (SELECT VALUE id FROM $from->(tagged WHERE out = $to))[0];
+    LET $tag = (SELECT VALUE id FROM $to)[0];
+
+    IF count($times_added) = 0 THEN {
+        IF ($tag = NONE) THEN {
+            CREATE $to SET name = $tag_name;
+        }
+        END;
+
+        RELATE $from->tagged->$to;
+        UPDATE type::thing($from) SET num_tags += 1;
+        UPDATE type::thing($to) SET num_collections += 1;
+    }
+    ELSE IF count($times_added) = 1 THEN {
+        DELETE FROM ($from->tagged) WHERE out = $to;
+        UPDATE type::thing($from) SET num_tags -= 1;
+        UPDATE type::thing($to) SET num_collections -= 1;
+    }
+    END;
+
+    UPDATE type::thing($from) SET add_tag = NULL;
+};
+
 -- Cuando se crea una carta se agrega al stack
 -- Esperamos un objecto de la forma:
 /*
