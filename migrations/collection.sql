@@ -65,31 +65,39 @@ DEFINE EVENT add_tag_to_collection ON collection WHEN (
     LET $tag_name = string::replace(add_tag, " ", "");
     LET $to = (type::thing("tag", $tag_name));
 
+    -- Si el nombre del tag es de mas de 25 caracteres o no es alfanumerico o si la coleccion ya tiene 5 tags no se hace nada
     IF num_tags > 5 OR is::alphanum($tag_name) = false OR string::len($tag_name) > 25 THEN {
         RETURN;
     }
     END;
 
+    -- Checamos si la relacion ya existe
     LET $times_added = (SELECT VALUE id FROM $from->(tagged WHERE out = $to))[0];
+    -- Checamos si el tag existe
     LET $tag = (SELECT VALUE id FROM $to)[0];
 
+    -- En caso de que no exista la relacion se crea
     IF count($times_added) = 0 THEN {
+        -- Si el tag no existe se crea
         IF ($tag = NONE) THEN {
             CREATE $to SET name = $tag_name;
         }
         END;
 
+        -- Se crea la relacion, y aumenta el numero de tags de la coleccion y el numero de colecciones del tag
         RELATE $from->tagged->$to;
         UPDATE type::thing($from) SET num_tags += 1;
         UPDATE type::thing($to) SET num_collections += 1;
     }
     ELSE IF count($times_added) = 1 THEN {
+        -- Se borra la relacion, y disminuye el numero de tags de la coleccion y el numero de colecciones del tag
         DELETE FROM ($from->tagged) WHERE out = $to;
         UPDATE type::thing($from) SET num_tags -= 1;
         UPDATE type::thing($to) SET num_collections -= 1;
     }
     END;
 
+    -- Se resetea el campo add_tag
     UPDATE type::thing($from) SET add_tag = NULL;
 };
 
