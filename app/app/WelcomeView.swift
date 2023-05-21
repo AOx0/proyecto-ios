@@ -15,10 +15,28 @@ struct User {
     var gravatar: String = ""
     var gravatar_md5: String = ""
     var following: Bool = false
+    var num_following: UInt64 = 0
+    var num_followers: UInt64 = 0
     
     var own_collections = [Collection]()
     var sus_collections = [Collection]()
     var rec_collections = [Collection]()
+    
+    public mutating func load_info(for_id: String, client: inout Surreal) async {
+        guard let info = try? await client.query("SELECT *, fn::is_following(id) FROM \(for_id)").json[0] else {
+            return
+        }
+        
+        id = info["id"].stringValue
+        email = info["email"].stringValue
+        first_name = info["first_name"].stringValue
+        last_name = info["last_name"].stringValue
+        gravatar = info["gravatar"].stringValue
+        gravatar_md5 = info["gravatar_md5"].stringValue
+        num_followers = info["num_followers"].uInt64Value
+        num_following = info["num_following"].uInt64Value
+        following = info["fn::is_following"].boolValue
+    }
     
     public mutating func reset() {
         self = User()

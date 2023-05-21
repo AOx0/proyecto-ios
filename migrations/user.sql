@@ -88,6 +88,18 @@ DEFINE FIELD view_collection ON user TYPE record(collection) VALUE $value OR NUL
         FOR select NONE
 ;
 
+-- Numero de usuarios que siguen a este usuario
+DEFINE FIELD num_followers ON user TYPE int VALUE $value OR 0
+    PERMISSIONS
+        FOR select FULL
+;
+
+-- Numero de usuarios a los que sigue este usuario
+DEFINE FIELD num_following ON user TYPE int VALUE $value OR 0
+    PERMISSIONS
+        FOR select FULL
+;
+
 DEFINE EVENT register_view ON user WHEN $event = "UPDATE" AND $after.view_collection != NULL THEN {
     LET $from = id;
     LET $to = view_collection;
@@ -124,17 +136,23 @@ DEFINE EVENT suscribe_user_to_collection ON user WHEN $event = "UPDATE" AND $aft
     UPDATE type::thing(id) SET suscribe_to = NULL;
 };
 
-DEFINE EVENT create_user_follow ON user WHEN $event = "UPDATE" AND $after.follow_user != NULL THEN {
+DEFINE EVENT create_user_follow ON user WHEN $event = "UPDATE" AND $after.follow_user != $before.follow_user AND $after.follow_user != NULL THEN {
     LET $from = id;
     LET $to = follow_user;
     LET $already_follow_relations = RETURN SELECT VALUE count(->(follow WHERE out = $to)) FROM type::thing(id);
     
     -- El trigger hace un toggle, es decir que si el usuario ya seguia a una persona hace que
     -- la deje de seguir y viceversa
-    IF ($from = $auth.id AND $to != $from AND $already_follow_relations[0] = 1) THEN
-        ( DELETE FROM ($from->follow) WHERE out=$to )
-    ELSE IF ($from = $auth.id AND $to != $from AND $already_follow_relations[0] = 0) THEN
-        ( RELATE $from->follow->$to UNIQUE SET follow_since = time::now() )
+    IF ($from = $auth.id AND $to != $from AND $already_follow_relations[0] = 1) THEN {
+        UPDATE type::thing($to) SET num_followers -= 1;
+        UPDATE type::thing($from) SET num_following -= 1;
+        DELETE FROM ($from->follow) WHERE out=$to;
+    }
+    ELSE IF ($from = $auth.id AND $to != $from AND $already_follow_relations[0] = 0) THEN {
+        UPDATE type::thing($to) SET num_followers += 1;
+        UPDATE type::thing($from) SET num_following += 1;
+        RELATE $from->follow->$to UNIQUE SET follow_since = time::now();
+    }
     END;
 
     UPDATE type::thing(id) SET follow_user = NULL;

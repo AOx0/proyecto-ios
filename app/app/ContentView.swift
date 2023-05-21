@@ -52,21 +52,10 @@ struct ContentView: View {
                         
                         
                         if (try await client.login(mail: email, pass: pass)) != nil {
-                            let _ = try? await client.authenticate()
-                            guard let info = try? await client.query("RETURN SELECT * FROM $auth.id").json[0] else {
-                                return
-                            }
+                            try await client.authenticate()
+                            await user.load_info(for_id: "$auth.id", client: &client)
                             
-                            print(client.auth as Any)
-
-                            user.id = info["id"].stringValue
-                            user.email = info["email"].stringValue
-                            user.first_name = info["first_name"].stringValue
-                            user.last_name = info["last_name"].stringValue
-                            user.gravatar = info["gravatar"].stringValue
-                            user.gravatar_md5 = info["gravatar_md5"].stringValue
                             currentView = 1
-                            
                             email = ""
                             pass = ""
                         }

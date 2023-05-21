@@ -83,7 +83,7 @@ struct CardView: View {
                         }
                         guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE num_views FROM \(collection.id)").json else { return }
                         
-                        await collection.load_cards(client: &client)
+                        let _ = await collection.load_cards(client: &client)
                         
                         collection.views = views_res.uInt64Value
                     }

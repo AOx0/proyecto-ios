@@ -134,6 +134,7 @@ struct Surreal {
         return auth
     }
 
+    @discardableResult
     public mutating func authenticate() async throws -> Response {
         guard let auth = auth else {
             throw SurrealError.SessionError

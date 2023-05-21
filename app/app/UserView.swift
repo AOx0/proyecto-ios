@@ -52,9 +52,9 @@ struct OtherUserView: View {
                             .font(.title)
                     }
                     
-                    Text("123 followers")
+                    Text("\(other_user.num_followers) followers")
                         .font(.footnote)
-                    Text("323 following")
+                    Text("\(other_user.num_following) following")
                         .font(.footnote)
                     
                 }
@@ -102,15 +102,7 @@ struct OtherUserView: View {
         }
         .onAppear() {
             Task{
-                guard let info = try? await client.query("RETURN SELECT *, fn::is_following(id) FROM \(id)").json else {
-                    return
-                }
-
-                other_user.id = info["id"].stringValue
-                other_user.first_name = info["first_name"].stringValue
-                other_user.last_name = info["last_name"].stringValue
-                other_user.gravatar_md5 = info["gravatar_md5"].stringValue
-                other_user.following = info["fn::is_following"].boolValue
+                await other_user.load_info(for_id: id, client: &client)
                 
                 // Cargar colecciones
                 guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = \(id))").json else {
@@ -191,6 +183,11 @@ struct UserView: View {
                            
                     }
                     .font(.footnote)
+                    
+                    Text("\(user.num_followers) followers")
+                        .font(.footnote)
+                    Text("\(user.num_following) following")
+                        .font(.footnote)
                 }
                 Spacer()
             }
