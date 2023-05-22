@@ -7,82 +7,6 @@
 
 import SwiftUI
 
-struct User {
-    var id: String = ""
-    var first_name: String = ""
-    var last_name: String = ""
-    var email: String = ""
-    var gravatar: String = ""
-    var gravatar_md5: String = ""
-    var following: Bool = false
-    var num_following: UInt64 = 0
-    var num_followers: UInt64 = 0
-    
-    var own_collections = [Collection]()
-    var sus_collections = [Collection]()
-    var rec_collections = [Collection]()
-    
-    public mutating func load_info(for_id: String, client: inout Surreal) async {
-        guard let info = try? await client.query("SELECT *, fn::is_following(id) FROM \(for_id)").json[0] else {
-            return
-        }
-        
-        id = info["id"].stringValue
-        email = info["email"].stringValue
-        first_name = info["first_name"].stringValue
-        last_name = info["last_name"].stringValue
-        gravatar = info["gravatar"].stringValue
-        gravatar_md5 = info["gravatar_md5"].stringValue
-        num_followers = info["num_followers"].uInt64Value
-        num_following = info["num_following"].uInt64Value
-        following = info["fn::is_following"].boolValue
-    }
-    
-    public mutating func reset() {
-        self = User()
-    }
-}
-
-struct Collection: Equatable {
-    var id: String
-    var name: String
-    var author: String
-    var description: String
-    var pub: Bool
-    var views: UInt64
-    var sus: UInt64
-    var user_owned = false
-    var is_suscribed = false
-    var cards: [Card] = [Card]()
-    
-    mutating func load_cards(client: inout Surreal) async -> Bool {
-        guard let response = try? await client.query("SELECT VALUE out.* FROM \(id)->stack").json else {
-            return false
-        }
-        
-        cards.removeAll()
-        for card_info in response.arrayValue {
-            cards.append(Card(
-                id: card_info["id"].stringValue,
-                collection_id: card_info["collection"].stringValue,
-                back: card_info["back"].stringValue,
-                front: card_info["front"].stringValue
-            ))
-        }
-        
-        print(cards)
-        
-        return true
-    }
-}
-
-struct Card: Equatable {
-    var id: String
-    var collection_id: String
-    var back: String
-    var front: String
-}
-
 struct NavButton: View {
     var title: String
     var image: String
@@ -122,24 +46,12 @@ struct WelcomeView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
+                guard let res = try? await client.query("SELECT *, fn::is_following(id) FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
                     return
                 }
-
-                user.rec_collections.removeAll()
-                for col in res.arrayValue {
-                    user.rec_collections.append(
-                        Collection(
-                            id: col["id"].stringValue,
-                            name: col["name"].stringValue,
-                            author: col["author"].stringValue,
-                            description: col["description"].stringValue,
-                            pub: col["public"].boolValue,
-                            views: col["num_views"].uInt64Value,
-                            sus: col["num_sus"].uInt64Value,
-                            is_suscribed: col["is_sus"].boolValue
-                        )
-                    )
+                
+                user.rec_collections = await res.arrayValue.asyncMap() { col in
+                    await Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }

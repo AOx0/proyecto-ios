@@ -170,13 +170,13 @@ struct Surreal {
     }
 
     public mutating func _send_recv(req: Request) async throws -> Response {
-        print("waiting")
+        print("waiting \(req.id) for \(req.params)")
         await semaphore.wait()
-        print("starting")
+        print("starting \(req.id) for \(req.params)")
             try await _send(req: req)
             let res = try await _recv(for_id: req.id)
         let _ = semaphore.signal()
-        print("done")
+        print("done \(req.id)")
         print(req)
         print(res)
         return res

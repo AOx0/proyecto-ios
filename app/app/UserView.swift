@@ -102,28 +102,15 @@ struct OtherUserView: View {
         }
         .onAppear() {
             Task{
-                await other_user.load_info(for_id: id, client: &client)
+                await other_user.load_user(for_id: id, client: &client)
                 
                 // Cargar colecciones
                 guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = \(id))").json else {
                     return
                 }
                 
-                other_user.own_collections.removeAll()
-                for col in res.arrayValue {
-                    other_user.own_collections.append(
-                        Collection(
-                            id: col["id"].stringValue,
-                            name: col["name"].stringValue,
-                            author: other_user.id,
-                            description: col["description"].stringValue,
-                            pub: col["public"].boolValue,
-                            views: col["num_views"].uInt64Value,
-                            sus: col["num_sus"].uInt64Value,
-                            user_owned: false,
-                            is_suscribed: col["is_sus"].boolValue
-                        )
-                    )
+                other_user.own_collections = await res.arrayValue.asyncMap() { col in
+                    await Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }
@@ -230,20 +217,8 @@ struct UserView: View {
                     return
                 }
                 
-                user.own_collections.removeAll()
-                for col in res.arrayValue {
-                    user.own_collections.append(
-                        Collection(
-                            id: col["id"].stringValue,
-                            name: col["name"].stringValue,
-                            author: user.id,
-                            description: col["description"].stringValue,
-                            pub: col["public"].boolValue,
-                            views: col["num_views"].uInt64Value,
-                            sus: col["num_sus"].uInt64Value,
-                            user_owned: true
-                        )
-                    )
+                await user.own_collections = res.arrayValue.asyncMap() { col in
+                    await Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }

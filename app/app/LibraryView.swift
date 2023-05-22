@@ -58,43 +58,18 @@ struct LibraryView: View {
                 guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
                     return
                 }
-
+                
+                await user.own_collections = res.arrayValue.asyncMap() { col in
+                    await Collection.load_collection(from_json: col, issuer: &user)
+                }
+                
                 // Obtener todas las colecciones a las que estamos suscritos
                 guard let sus = try? await client.query("SELECT * FROM collection WHERE <-sus<-(user WHERE id = $auth.id)").json else {
                     return
                 }
                 
-                user.own_collections.removeAll()
-                user.sus_collections.removeAll()
-                for col in res.arrayValue {
-                    user.own_collections.append(
-                        Collection(
-                            id: col["id"].stringValue,
-                            name: col["name"].stringValue,
-                            author: user.id,
-                            description: col["description"].stringValue,
-                            pub: col["public"].boolValue,
-                            views: col["num_views"].uInt64Value,
-                            sus: col["num_sus"].uInt64Value,
-                            user_owned: true,
-                            is_suscribed: false
-                        )
-                    )
-                }
-                
-                for col in sus.arrayValue {
-                    user.sus_collections.append(
-                        Collection(
-                            id: col["id"].stringValue,
-                            name: col["name"].stringValue,
-                            author: col["author"].stringValue,
-                            description: col["description"].stringValue,
-                            pub: col["public"].boolValue,
-                            views: col["num_views"].uInt64Value,
-                            sus: col["num_sus"].uInt64Value,
-                            is_suscribed: true
-                        )
-                    )
+                await user.sus_collections = sus.arrayValue.asyncMap() { col in
+                    await Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }

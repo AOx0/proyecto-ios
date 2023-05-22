@@ -11,7 +11,7 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @State var user = User()
     
-    @State var client: Surreal = Surreal(address: "189.171.139.41:8000")
+    @State var client: Surreal = Surreal(address: "34.125.0.154:8000")
     
     @State var email = "daniel@gmail.com"
     @State var pass = "1234"
@@ -53,7 +53,7 @@ struct ContentView: View {
                         
                         if (try await client.login(mail: email, pass: pass)) != nil {
                             try await client.authenticate()
-                            await user.load_info(for_id: "$auth.id", client: &client)
+                            await user.load_user(for_id: "$auth.id", client: &client)
                             
                             currentView = 1
                             email = ""
