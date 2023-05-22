@@ -53,12 +53,18 @@ struct CardView: View {
                 .navigationTitle(Text(collection.name))
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        if !collection.user_owned {
+                        if !collection.user_owned && collection.pub {
                             Button(collection.is_suscribed  ? "Unsuscribe" : "Suscribe") {
-                                // Assume a successfull process to suscribe/unsuscribe
+                                // Asumimos que la suscripcion es exitosa
                                 collection.is_suscribed = !collection.is_suscribed
+                                // Cambiamos el conteo de subs de forma inmediata ?
+                                if collection.is_suscribed {
+                                    collection.sus += 1
+                                } else {
+                                    collection.sus -= 1
+                                }
                                 
-                                // Actually suscribe/unsuscribe
+                                // Realizamos la accion en el servidor
                                 Task {
                                     // IMPORTANT: Here we inverse-check because we already toggled the value
                                     let _ = try? await client.query("UPDATE type::thing($auth.id) SET suscribe_to = \(collection.id)")
@@ -66,7 +72,7 @@ struct CardView: View {
                                         return
                                     }
                                     
-                                    // Update suscription status whith the actual data
+                                    // Actualizamos los datos reales reflejando la accion
                                     collection.is_suscribed = res["is_sus"].boolValue
                                     collection.sus = res["num_sus"].uInt64Value
                                 }
@@ -78,14 +84,19 @@ struct CardView: View {
                 }
                 .onAppear() {
                     Task {
-                        if collection.pub {
-                            let _ = try? await client.query("UPDATE \(user.id) SET view_collection = \(collection.id)")
+                        // Incrementa el numero de views al instante
+                        if collection.pub && !collection.user_owned { collection.views += 1 }
+                        
+                        // Cargar las cartas de la coleccion
+                        await collection.load_cards(client: &client)
+                        
+                        // Cargar el numero de views real
+                        if collection.pub && !collection.user_owned {
+                            try await client.query("UPDATE \(user.id) SET view_collection = \(collection.id)")
+                            
+                            guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE num_views FROM \(collection.id)").json else { return }
+                            collection.views = views_res.uInt64Value
                         }
-                        guard let views_res: JSON = try? await client.query("RETURN SELECT VALUE num_views FROM \(collection.id)").json else { return }
-                        
-                        let _ = await collection.load_cards(client: &client)
-                        
-                        collection.views = views_res.uInt64Value
                     }
                 }
             } label: {
@@ -131,15 +142,6 @@ struct CardView: View {
                         .fill(.gray).opacity(0.1)
                 }
                 .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-            }
-        }
-        .onAppear() {
-            Task {
-                if collection.pub {
-                    guard let views_res: JSON = try? await client.query("RETURN SELECT num_sus, num_views FROM \(collection.id)").json else { return }
-                    collection.views = views_res["num_views"].uInt64Value
-                    collection.sus = views_res["num_sus"].uInt64Value
-                }
             }
         }
     }

@@ -54,6 +54,7 @@ struct Surreal {
         state = SurrealState.Disconnected
     }
     
+    @discardableResult
     public mutating func query(_ sql: String) async throws -> Response {
         return try await _send_recv(req: Request(id: UUID().uuidString.lowercased(), method: "query", params: try! JSONEncoder().encode([sql]).intoJSON()))
     }
@@ -162,7 +163,6 @@ struct Surreal {
         let res = try await connection.receive()
         switch res {
             case .string(let str):
-                print(res)
                 return try JSONDecoder().decode(Response.self, from: str.data(using: String.Encoding.utf8)!)
             default:
                 throw SurrealError.SessionError
@@ -170,15 +170,15 @@ struct Surreal {
     }
 
     public mutating func _send_recv(req: Request) async throws -> Response {
-        print("waiting \(req.id) for \(req.params)")
+        // print("waiting \(req.id)")
         await semaphore.wait()
-        print("starting \(req.id) for \(req.params)")
+        // print("starting \(req.id) for \(req.params)")
             try await _send(req: req)
             let res = try await _recv(for_id: req.id)
         let _ = semaphore.signal()
-        print("done \(req.id)")
-        print(req)
-        print(res)
+        // print("done \(req.id)")
+        // print(req)
+        // print(res)
         return res
     }
 }

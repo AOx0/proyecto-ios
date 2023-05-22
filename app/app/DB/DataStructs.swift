@@ -8,21 +8,6 @@
 import Foundation
 import SwiftyJSON
 
-// Implementación de https://www.swiftbysundell.com/articles/async-and-concurrent-forEach-and-map/
-extension Sequence {
-    func asyncMap<T>(
-        _ transform: (Element) async throws -> T
-    ) async rethrows -> [T] {
-        var values = [T]()
-
-        for element in self {
-            try await values.append(transform(element))
-        }
-
-        return values
-    }
-}
-
 struct User {
     var id: String = ""
     var first_name: String = ""
@@ -33,7 +18,6 @@ struct User {
     var following: Bool = false
     var num_following: UInt64 = 0
     var num_followers: UInt64 = 0
-    
     var own_collections = [Collection]()
     var sus_collections = [Collection]()
     var rec_collections = [Collection]()
@@ -71,7 +55,7 @@ struct Collection: Equatable {
     var is_suscribed = false
     var cards: [Card] = [Card]()
 
-    static func load_collection(from_json info: JSON, issuer: inout User) async -> Collection {
+    static func load_collection(from_json info: JSON, issuer: inout User) -> Collection {
         return Collection(
             id: info["id"].stringValue,
             name: info["name"].stringValue,
@@ -85,22 +69,20 @@ struct Collection: Equatable {
         )
     }
 
+    @discardableResult
     mutating func load_cards(client: inout Surreal) async -> Bool {
         guard let response = try? await client.query("SELECT VALUE out.* FROM \(id)->stack").json else {
             return false
         }
         
-        cards.removeAll()
-        for card_info in response.arrayValue {
-            cards.append(Card(
-                id: card_info["id"].stringValue,
-                collection_id: card_info["collection"].stringValue,
-                back: card_info["back"].stringValue,
-                front: card_info["front"].stringValue
-            ))
+        cards = response.arrayValue.map() { info in
+            Card(
+                id: info["id"].stringValue,
+                collection_id: info["collection"].stringValue,
+                back: info["back"].stringValue,
+                front: info["front"].stringValue
+            )
         }
-        
-        print(cards)
         
         return true
     }

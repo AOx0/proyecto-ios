@@ -50,8 +50,8 @@ struct WelcomeView: View {
                     return
                 }
                 
-                user.rec_collections = await res.arrayValue.asyncMap() { col in
-                    await Collection.load_collection(from_json: col, issuer: &user)
+                user.rec_collections = res.arrayValue.map() { col in
+                    Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }

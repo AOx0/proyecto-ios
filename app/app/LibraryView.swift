@@ -59,8 +59,8 @@ struct LibraryView: View {
                     return
                 }
                 
-                await user.own_collections = res.arrayValue.asyncMap() { col in
-                    await Collection.load_collection(from_json: col, issuer: &user)
+                user.own_collections = res.arrayValue.map() { col in
+                    Collection.load_collection(from_json: col, issuer: &user)
                 }
                 
                 // Obtener todas las colecciones a las que estamos suscritos
@@ -68,8 +68,8 @@ struct LibraryView: View {
                     return
                 }
                 
-                await user.sus_collections = sus.arrayValue.asyncMap() { col in
-                    await Collection.load_collection(from_json: col, issuer: &user)
+                user.sus_collections = sus.arrayValue.map() { col in
+                    Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }

@@ -109,8 +109,8 @@ struct OtherUserView: View {
                     return
                 }
                 
-                other_user.own_collections = await res.arrayValue.asyncMap() { col in
-                    await Collection.load_collection(from_json: col, issuer: &user)
+                other_user.own_collections = res.arrayValue.map() { col in
+                    Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }
@@ -217,8 +217,8 @@ struct UserView: View {
                     return
                 }
                 
-                await user.own_collections = res.arrayValue.asyncMap() { col in
-                    await Collection.load_collection(from_json: col, issuer: &user)
+                user.own_collections = res.arrayValue.map() { col in
+                    Collection.load_collection(from_json: col, issuer: &user)
                 }
             }
         }
