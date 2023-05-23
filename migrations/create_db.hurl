@@ -109,15 +109,24 @@ Accept: application/json
 NS: proyecto_ios
 DB: proyecto
 ```
-CREATE collection
+CREATE collection:esp1
 	SET name= "Español I",
 		public = true
 ;
 
-CREATE collection
+CREATE collection:esp2
 	SET name= "Español II",
 		public = true
 ;
+
+CREATE collection:esp3
+	SET name= "Español III",
+		public = true
+;
+
+UPDATE collection:esp1 SET add_tag = "Español"; 
+UPDATE collection:esp2 SET add_tag = "Español"; 
+UPDATE collection:esp3 SET add_tag = "Español"; 
 ```
 HTTP 200
 
