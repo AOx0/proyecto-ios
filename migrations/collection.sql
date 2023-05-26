@@ -55,7 +55,10 @@ DEFINE FIELD add_card.back ON collection TYPE string;
 
 -- Endpoint para agregar tags
 DEFINE FIELD add_tag ON collection TYPE string VALUE $value OR NULL;
-DEFINE FIELD num_tags ON collection TYPE int VALUE $value OR 0;
+DEFINE FIELD num_tags  ON collection TYPE int VALUE $value OR 0
+PERMISSIONS 
+    FOR create, update, delete NONE
+;
 
 -- Cuando se asigna a add_tag se crea la relacion con el tag si el numero de tags es menor a 5
 DEFINE EVENT add_tag_to_collection ON collection WHEN (
