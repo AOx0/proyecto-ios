@@ -21,6 +21,9 @@ struct User {
     var own_collections = [Collection]()
     var sus_collections = [Collection]()
     var rec_collections = [Collection]()
+    var search_collections = [[Collection](), [Collection](), [Collection]()]
+
+
     
     public mutating func load_user(for_id: String, client: inout Surreal) async {
         guard let info = try? await client.query("SELECT *, fn::is_following(id) FROM \(for_id)").json[0] else {

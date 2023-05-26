@@ -70,6 +70,7 @@ struct LibraryView: View {
                 
                 user.sus_collections = sus.arrayValue.map() { col in
                     Collection.load_collection(from_json: col, issuer: &user)
+                    
                 }
             }
         }

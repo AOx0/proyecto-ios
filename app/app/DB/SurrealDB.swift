@@ -163,6 +163,7 @@ struct Surreal {
         let res = try await connection.receive()
         switch res {
             case .string(let str):
+                print(str)
                 return try JSONDecoder().decode(Response.self, from: str.data(using: String.Encoding.utf8)!)
             default:
                 throw SurrealError.SessionError
@@ -170,13 +171,13 @@ struct Surreal {
     }
 
     public mutating func _send_recv(req: Request) async throws -> Response {
-        // print("waiting \(req.id)")
+        print("waiting \(req.id)")
         await semaphore.wait()
-        // print("starting \(req.id) for \(req.params)")
+        print("starting \(req.id) for \(req.params)")
             try await _send(req: req)
             let res = try await _recv(for_id: req.id)
         let _ = semaphore.signal()
-        // print("done \(req.id)")
+        print("done \(req.id)")
         // print(req)
         // print(res)
         return res

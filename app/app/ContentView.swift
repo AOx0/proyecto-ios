@@ -78,7 +78,7 @@ struct ContentView: View {
                         .navigationTitle("Bienvenido, \(user.first_name.capitalized)".trimmingCharacters(in: [" ", ","]) + "!")
                 case 2: LibraryView(client: $client, user: $user)
                         .navigationTitle("Library")
-                case 3: SearchView()
+                case 3: SearchView(client: $client, user: $user)
                         .navigationTitle("Search")
                 case 4: UserView(client: $client, user: $user)
                         .navigationTitle("Account")
