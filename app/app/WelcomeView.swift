@@ -46,7 +46,17 @@ struct WelcomeView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT *, fn::is_sus(id) FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
+                guard let res = try? await client.query("""
+BEGIN;
+    LET $seen = SELECT VALUE id FROM (SELECT out.id as id FROM ($auth.id)->view GROUP BY id LIMIT 100 );
+    LET $seen_by_others = SELECT VALUE id FROM (SELECT out.id as id FROM ($auth.id)->follow->user->view GROUP BY id LIMIT 100);
+    LET $seeng = array::union($seen, $seen_by_others);
+    LET $a = SELECT * FROM $seeng->tagged->tag WHERE array::len(id) > 0;
+    LET $tags = RETURN array::distinct(array::flatten($a));
+
+    RETURN SELECT *, fn::is_sus(id) FROM array::distinct(array::flatten((SELECT VALUE in.* FROM $tags<-tagged)));
+COMMIT;
+""").json else {
                     return
                 }
                 
