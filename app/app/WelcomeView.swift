@@ -46,7 +46,7 @@ struct WelcomeView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT *, fn::is_following(id) FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
+                guard let res = try? await client.query("SELECT *, fn::is_sus(id) FROM collection WHERE <-owns<-(user WHERE id != $auth.id) LIMIT 5").json else {
                     return
                 }
                 

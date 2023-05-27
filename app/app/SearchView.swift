@@ -27,7 +27,7 @@ struct SearchView: View {
                     TextField("Search by ...",text: $search) .textInputAutocapitalization(.never)
                         .textFieldStyle(.roundedBorder).onChange(of: search){
                             query in Task{
-                                guard let res = try? await client.query("select * from array::distinct(array::flatten((SELECT * FROM (SELECT VALUE id FROM user WHERE type::string(id) ~ '\(search)')->owns->collection)))").json else {
+                                guard let res = try? await client.query("select *, fn::is_sus(id) from array::distinct(array::flatten((SELECT * FROM (SELECT VALUE id FROM user WHERE type::string(id) ~ '\(search)')->owns->collection)))").json else {
                                     return
                                 }
                                 user.search_collections[0] = res.arrayValue.map() { col in
@@ -35,7 +35,7 @@ struct SearchView: View {
                                 }
                                 
                                 
-                                guard let res2 = try? await client.query("select * from array::distinct(array::flatten((SELECT * FROM (SELECT VALUE id FROM tag WHERE type::string(id) ~ '\(search)')<-tagged<-collection)))").json else{
+                                guard let res2 = try? await client.query("select *, fn::is_sus(id) from array::distinct(array::flatten((SELECT * FROM (SELECT VALUE id FROM tag WHERE type::string(id) ~ '\(search)')<-tagged<-collection)))").json else{
                                     return
                                 }
                                 user.search_collections[1] = res2.arrayValue.map() { col2 in
@@ -43,7 +43,7 @@ struct SearchView: View {
                                 }
                                 
                                 
-                                guard let res3 = try? await client.query("select * from array::distinct(array::flatten((select value id from collection where name ?~ '\(search)')))").json else {
+                                guard let res3 = try? await client.query("select *, fn::is_sus(id) from array::distinct(array::flatten((select value id from collection where name ?~ '\(search)')))").json else {
                                     return
                                 }
                                 user.search_collections[2] = res3.arrayValue.map() { col3 in

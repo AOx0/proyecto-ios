@@ -105,7 +105,7 @@ struct OtherUserView: View {
                 await other_user.load_user(for_id: id, client: &client)
                 
                 // Cargar colecciones
-                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = \(id))").json else {
+                guard let res = try? await client.query("SELECT *, fn::is_sus(id) FROM collection WHERE <-owns<-(user WHERE id = \(id))").json else {
                     return
                 }
                 
@@ -213,7 +213,7 @@ struct UserView: View {
         }
         .onAppear() {
             Task{
-                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
+                guard let res = try? await client.query("SELECT *, fn::is_sus(id) FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
                     return
                 }
                 

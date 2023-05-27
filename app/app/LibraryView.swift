@@ -55,7 +55,7 @@ struct LibraryView: View {
         .onAppear() {
             Task{
                 // Obtener todas las colecciones de las que somos dueños
-                guard let res = try? await client.query("SELECT * FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
+                guard let res = try? await client.query("SELECT *, fn::is_sus(id) FROM collection WHERE <-owns<-(user WHERE id = $auth.id)").json else {
                     return
                 }
                 
@@ -64,7 +64,7 @@ struct LibraryView: View {
                 }
                 
                 // Obtener todas las colecciones a las que estamos suscritos
-                guard let sus = try? await client.query("SELECT * FROM collection WHERE <-sus<-(user WHERE id = $auth.id)").json else {
+                guard let sus = try? await client.query("SELECT *, fn::is_sus(id) FROM collection WHERE <-sus<-(user WHERE id = $auth.id)").json else {
                     return
                 }
                 

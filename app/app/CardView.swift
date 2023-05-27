@@ -68,12 +68,12 @@ struct CardView: View {
                                 Task {
                                     // IMPORTANT: Here we inverse-check because we already toggled the value
                                     let _ = try? await client.query("UPDATE type::thing($auth.id) SET suscribe_to = \(collection.id)")
-                                    guard let res = try? await client.query("RETURN SELECT is_sus, num_sus FROM \(collection.id)").json else {
+                                    guard let res = try? await client.query("RETURN SELECT fn::is_sus(id), num_sus FROM \(collection.id)").json else {
                                         return
                                     }
                                     
                                     // Actualizamos los datos reales reflejando la accion
-                                    collection.is_suscribed = res["is_sus"].boolValue
+                                    collection.is_suscribed = res["fn::is_sus"].boolValue
                                     collection.sus = res["num_sus"].uInt64Value
                                 }
                                 

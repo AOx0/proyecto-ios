@@ -68,7 +68,7 @@ struct Collection: Equatable {
             views: info["num_views"].uInt64Value,
             sus: info["num_sus"].uInt64Value,
             user_owned: issuer.id == info["author"].stringValue,
-            is_suscribed: info["is_sus"].boolValue
+            is_suscribed: info["fn::is_sus"].boolValue
         )
     }
 
