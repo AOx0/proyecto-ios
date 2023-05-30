@@ -23,7 +23,7 @@ struct SearchView: View {
      
             VStack{
                
-                    
+               
                     TextField("Search by ...",text: $search) .textInputAutocapitalization(.never)
                         .textFieldStyle(.roundedBorder).onChange(of: search){
                             query in Task{
@@ -53,28 +53,30 @@ struct SearchView: View {
                         }
                 
               
-                
-                ScrollView{
-                    ForEach(0..<user.search_collections.filter({
-                        e in !e.isEmpty
-                    }).count, id: \.self){i in
-                        VStack{
-                            Divider()
-                            HStack{
-                                Text(names[i]).font(.title3).bold().onTapGesture {
-                                    is_active[i].toggle()
-                                }.fullScreenCover(isPresented: $is_active[i], content: {
-                                    search_user(titulo : names[i],client: $client, user: $user, id: i)
-                                })
-                                Spacer()
-                            }.padding()
+                if (search != ""){
+                    ScrollView{
+                        ForEach(0..<user.search_collections.filter({
+                            e in !e.isEmpty
+                        }).count, id: \.self){i in
+                            VStack{
+                                Divider()
+                                HStack{
+                                    Text(names[i]).font(.title3).bold().onTapGesture {
+                                        is_active[i].toggle()
+                                    }.fullScreenCover(isPresented: $is_active[i], content: {
+                                        search_user(titulo : names[i],client: $client, user: $user, id: i)
+                                    })
+                                    Spacer()
+                                }.padding()
+                                
+                                coll(client: $client, user: $user, i: i)
+                            }
                             
-                            coll(client: $client, user: $user, i: i)
                         }
                         
                     }
-                    
                 }
+                Text("")
         }
     }
 }
