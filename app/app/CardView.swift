@@ -16,6 +16,7 @@ struct CardView: View {
     @Binding var client: Surreal
     @Binding var other_user: User
     @Binding var user: User
+    
 
     var body: some View {
         Group {
@@ -43,9 +44,24 @@ struct CardView: View {
                     
                     Divider()
                     
-                    ForEach(collection.cards, id: \.self.id) { card in
-                        Text(card.id)
+                    ScrollView{
+                        ForEach(collection.cards, id:\.self.id){card in
+                            
+                            
+                            VStack{
+                                HStack{
+                                    Text(" ¿ \(card.back) ? ").font(.title3)
+                                    Spacer()
+                                }.padding()
+                                .background() {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(.gray).opacity(0.1)
+                                        
+                                }
+                               
+                        }
                     }
+                }
                     
                     Spacer()
                 }

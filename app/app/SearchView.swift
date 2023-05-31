@@ -16,14 +16,9 @@ struct SearchView: View {
     var names = ["User Name", "Tag", "Collections"]
     @State var is_active = [false, false, false]
     
-  
-
-
     var body: some View {
-     
+    
             VStack{
-               
-               
                     TextField("Search by ...",text: $search) .textInputAutocapitalization(.never)
                         .textFieldStyle(.roundedBorder).onChange(of: search){
                             query in Task{

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06B3C76D2A2715FE008A1A00 /* questions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B3C76C2A2715FE008A1A00 /* questions.swift */; };
 		A91AC4222A04BCB9004B7916 /* appApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91AC4212A04BCB9004B7916 /* appApp.swift */; };
 		A91AC4242A04BCB9004B7916 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91AC4232A04BCB9004B7916 /* ContentView.swift */; };
 		A91AC4262A04BCC0004B7916 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A91AC4252A04BCC0004B7916 /* Assets.xcassets */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		06B3C76C2A2715FE008A1A00 /* questions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = questions.swift; sourceTree = "<group>"; };
 		A91AC41E2A04BCB9004B7916 /* app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = app.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A91AC4212A04BCB9004B7916 /* appApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appApp.swift; sourceTree = "<group>"; };
 		A91AC4232A04BCB9004B7916 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				A9BC4D2E2A1BEE51009D9179 /* DB */,
 				A91AC4362A04E08E004B7916 /* CreateCollection.swift */,
 				A91AC4342A04D5B5004B7916 /* WelcomeView.swift */,
+				06B3C76C2A2715FE008A1A00 /* questions.swift */,
 				A9BB03022A06DB590093A6AC /* LibraryView.swift */,
 				A91AC4212A04BCB9004B7916 /* appApp.swift */,
 				A91AC4232A04BCB9004B7916 /* ContentView.swift */,
@@ -184,6 +187,7 @@
 				A91AC4302A04BD61004B7916 /* SurrealDB.swift in Sources */,
 				A9BCAE9F2A0AF63400DC3A0C /* CardView.swift in Sources */,
 				A9BC4D302A1BEE7E009D9179 /* DataStructs.swift in Sources */,
+				06B3C76D2A2715FE008A1A00 /* questions.swift in Sources */,
 				A91AC4242A04BCB9004B7916 /* ContentView.swift in Sources */,
 				A91AC4222A04BCB9004B7916 /* appApp.swift in Sources */,
 				A91AC4372A04E08E004B7916 /* CreateCollection.swift in Sources */,
