@@ -38,6 +38,9 @@ struct ContentView: View {
     
     fileprivate func LoginView() -> some View {
         return VStack{
+            Text("Academia no tamagochi !").font(.title).bold()
+            Spacer()
+            
             TextField("Email", text: $email)
                 .textInputAutocapitalization(.never)
                 .textFieldStyle(.roundedBorder)
@@ -67,6 +70,7 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderedProminent)
             }
+            Spacer()
         }.padding()
     }
     
@@ -93,7 +97,7 @@ struct ContentView: View {
                         .opacity(currentView == 1 ? 0.5 : 1.0)
                     Spacer()
                     NavigationLink {
-                        CreateCollection(currentView: $currentView)
+                        CreateCollection(client: $client, currentView: $currentView)
                     } label: {
                         VStack {
                             Image(systemName: "plus.circle.fill")

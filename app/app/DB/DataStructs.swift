@@ -96,4 +96,9 @@ struct Card: Equatable {
     var collection_id: String
     var back: String
     var front: String
+    var show_question = true
+    
+    mutating func toggle_show() {
+        show_question.toggle()
+    }
 }

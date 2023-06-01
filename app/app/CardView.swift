@@ -16,6 +16,7 @@ struct CardView: View {
     @Binding var client: Surreal
     @Binding var other_user: User
     @Binding var user: User
+    @State var state = false
     
 
     var body: some View {
@@ -45,23 +46,30 @@ struct CardView: View {
                     Divider()
                     
                     ScrollView{
-                        ForEach(collection.cards, id:\.self.id){card in
+                        ForEach(collection.cards, id:\.self.id){ card in
                             
                             
                             VStack{
                                 HStack{
-                                    Text(" ¿ \(card.back) ? ").font(.title3)
+                                    Text("Q: \(card.front)").font(.title3)
                                     Spacer()
+                                    VStack{
+                                        Text("A: \(card.back)").font(.title3)
+                                    }
                                 }.padding()
                                 .background() {
                                     RoundedRectangle(cornerRadius: 10)
                                         .fill(.gray).opacity(0.1)
                                         
                                 }
-                               
                         }
                     }
                 }
+                    if collection.user_owned {
+                        NavigationLink(destination: CreateCard(client: $client, collection: $collection)){
+                            Text("Añadir")
+                        }
+                    }
                     
                     Spacer()
                 }

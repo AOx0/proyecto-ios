@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CreateCollection: View {
+    @Binding var client: Surreal
     @Environment(\.dismiss) var dismiss
     @State var currentView: Binding<Int>
     
@@ -43,7 +44,16 @@ struct CreateCollection: View {
                     Spacer()
                     
                     Button("Create") {
-                        dismiss()
+                        Task {
+                            let _ = try? await client.query("""
+                            CREATE collection
+                                SET name= "\(collectionName)",
+                                    public = \(isPublic ? "true" : "false")
+                            ;
+                            """)
+                            dismiss()
+                        }
+                        
                     }
                 }
             }

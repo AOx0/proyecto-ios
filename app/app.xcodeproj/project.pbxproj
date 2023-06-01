@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		062CEC642A28188900A30D1E /* CreateCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062CEC632A28188900A30D1E /* CreateCard.swift */; };
 		06B3C76D2A2715FE008A1A00 /* questions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B3C76C2A2715FE008A1A00 /* questions.swift */; };
 		A91AC4222A04BCB9004B7916 /* appApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91AC4212A04BCB9004B7916 /* appApp.swift */; };
 		A91AC4242A04BCB9004B7916 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91AC4232A04BCB9004B7916 /* ContentView.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		062CEC632A28188900A30D1E /* CreateCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCard.swift; sourceTree = "<group>"; };
 		06B3C76C2A2715FE008A1A00 /* questions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = questions.swift; sourceTree = "<group>"; };
 		A91AC41E2A04BCB9004B7916 /* app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = app.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A91AC4212A04BCB9004B7916 /* appApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appApp.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 			children = (
 				A91AC42F2A04BD61004B7916 /* SurrealDB.swift */,
 				A9BC4D2F2A1BEE7E009D9179 /* DataStructs.swift */,
+				062CEC632A28188900A30D1E /* CreateCard.swift */,
 			);
 			path = DB;
 			sourceTree = "<group>";
@@ -193,6 +196,7 @@
 				A91AC4372A04E08E004B7916 /* CreateCollection.swift in Sources */,
 				A91FA0212A06F178007ECE37 /* SearchView.swift in Sources */,
 				A9BB03032A06DB590093A6AC /* LibraryView.swift in Sources */,
+				062CEC642A28188900A30D1E /* CreateCard.swift in Sources */,
 				A91AC4352A04D5B5004B7916 /* WelcomeView.swift in Sources */,
 				A91FA01F2A06F11A007ECE37 /* UserView.swift in Sources */,
 			);
